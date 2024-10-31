@@ -1,0 +1,39 @@
+.filter-sorting {
+    display: grid;
+    grid-template-columns: 1fr auto;
+
+    .filters {
+        justify-self: start;
+    }
+
+    a {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+        font-size: 0.8rem;
+        color: var(--color-grey-500);
+
+        img {
+            margin: 5px;
+        }
+    }
+
+    .btn.dropdown-toggle {
+        background-image: none !important;
+        padding: 0;
+        border: none;
+    }
+
+    .dropdown-menu {
+
+        li {
+            margin: 0.2rem;
+            padding: 0.2rem;
+        }
+    }
+
+    .btn.dropdown-toggle::after {
+        display: none;
+    }
+}

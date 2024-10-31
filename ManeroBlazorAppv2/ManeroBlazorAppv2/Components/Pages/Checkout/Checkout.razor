@@ -1,0 +1,142 @@
+﻿@page "/checkout"
+@using System.Security.Claims
+@inject HttpClient httpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject CheckoutService CheckoutService
+@inject OrderFactory OrderFactory
+@inject NavigationManager NavigationManager
+@using System.Globalization
+@rendermode InteractiveServer
+
+<AuthorizeView>
+    <Authorized>
+        <div class="container @(string.IsNullOrEmpty(ErrorMessage) ? "checkout-container" : "checkout-container-alert")">
+            <header class="checkout-header">
+                <div class="checkout-header-image">
+                    <NavLink href="/"><img src="/images/icons/arrow-left.svg" alt="arrow left" /></NavLink>
+                </div>
+                <div class="checkout-page-label">Checkout</div>
+            </header>
+            <CheckoutProducts @ref="checkoutProducts" />
+            <div class="checkout-shipping-details">
+                <div>
+                    <div class="checkout-section-label">Shipping details</div>
+                    <div class="checkout-info">@ShippingAddress</div>
+                </div>
+                <NavLink href="/shippingdetails"><img src="/images/icons/arrow-right.svg" alt="arrow right" /></NavLink>
+            </div>
+            <div class="checkout-payment-methods">
+                <div>
+                    <div class="checkout-section-label">Payment method</div>
+                    <div class="checkout-info">@PaymentMethod</div>
+                </div>
+                <NavLink href="/payment"><img src="/images/icons/arrow-right.svg" alt="arrow right" /></NavLink>
+            </div>
+            <div class="checkout-delivery-date">
+                <div>Estimated delivery date </div>
+                <div>@deliverDate.ToString("MMM dd", new CultureInfo("en-US"))</div>
+            </div>
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="checkout-alert-empty"></div>
+                <div class="alert alert-danger checkout-alert">@ErrorMessage</div>
+                @* <div class="checkout-alert-empty"></div> *@
+            }
+            else
+            {
+                <div></div>
+            }
+            <div class="checkout-button-container">
+                <button type="submit" class="checkout-button btn btn-white" @onclick="ConfirmOrder">CONFIRM ORDER</button>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="container checkout-access-container">
+            <div>You are not authorized to view this page. Please log in.</div>
+            <NavLink href="/login" class="checkout-link-login">Go to Login</NavLink>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private string ShippingAddress => CheckoutService.ShippingAddress ?? "Select shipping address";
+    private string PaymentMethod => CheckoutService.PaymentMethod ?? "Select payment method";
+    DateTime deliverDate = DateTime.Now.AddDays(3).Date;
+    private CheckoutProducts checkoutProducts = null!; 
+    private string ErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            ErrorMessage = "User is not authenticated.";
+            return;
+        }
+
+        CheckoutService.UserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(CheckoutService.UserId))
+        {
+            ErrorMessage = "User ID is not available.";
+        }
+    }
+
+    private async Task ConfirmOrder()
+    {
+        if (string.IsNullOrEmpty(CheckoutService.UserId))
+        {
+            ErrorMessage = "User ID is not available. Please try again.";
+            return;
+        }
+
+        if (ShippingAddress == "Select shipping address" || PaymentMethod == "Select payment method")
+        {
+            ErrorMessage = "Please ensure both shipping details and payment method are selected";
+            return;
+        }
+
+        if (checkoutProducts == null)
+        {
+            ErrorMessage = "Failed to load products. Please refresh the page and try again.";
+            return;
+        }
+
+        var orderItems = checkoutProducts.GetSelectedProducts()
+            .Select(p => OrderFactory.CreateOrderItem(p.Id, p.Quantity))
+            .ToList();
+
+        var order = OrderFactory.CreateOrderRequest(
+            CheckoutService.UserId,
+            ShippingAddress,
+            10,
+            deliverDate,
+            orderItems,
+            CheckoutService.MaskedCardNumber,
+            CheckoutService.PaymentId
+        );
+
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("https://maneroorderprovider.azurewebsites.net/api/create?code=mwaSYi3vWkqoQaiSCaiYbRe103t4N047CIpRE5jKNufMAzFufKPjvg%3D%3D", order);
+            if (response.IsSuccessStatusCode)
+            {
+                var createdOrder = await response.Content.ReadFromJsonAsync<OrderResponseModel>();
+                CheckoutService.CurrentOrder = createdOrder;
+                NavigationManager.NavigateTo("/ordersuccess");
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/orderfailure");
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred while creating the order: {ex.Message}";
+        }
+    }
+}

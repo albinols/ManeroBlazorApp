@@ -1,0 +1,38 @@
+@import '../core/mixins.scss';
+
+.categories-bar {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    place-items: center;
+    /*padding: 0.5rem;*/
+    border-top: 1px solid var(--color-light-blue);
+    padding-top: 1rem;
+
+    .category-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 100px;
+        object-fit: cover;
+    }
+
+    p {
+        text-align: center;
+        text-decoration: none;
+        color: black;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    @include md {
+        .category-img {
+            width: 200px;
+            height: 200px;
+        }
+
+        .categories-bar {
+            padding: 1rem;
+        }
+    }
+}

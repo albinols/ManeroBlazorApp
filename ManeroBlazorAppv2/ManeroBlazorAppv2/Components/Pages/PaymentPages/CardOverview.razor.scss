@@ -1,0 +1,171 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3rem;
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 45vw;
+
+        @media (max-width: 468px) {
+            width: 78vw;
+        }
+
+        a {
+
+            img {
+                margin-top: -8px;
+
+                @media (max-width: 468px) {
+                    margin-left: -1.5rem;
+                }
+            }
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-left: -0.5rem;
+        }
+
+        ::deep a.invisible-icon {
+
+            img {
+                display: none;
+            }
+        }
+    }
+
+    .card-header {
+        width: 45vw;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        @media (max-width: 468px) {
+            width: 90vw;
+        }
+
+        .card-title {
+            font-weight: 600;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #626262;
+
+            label {
+                font-size: 0.85rem;
+                margin-right: 0.85rem;
+            }
+
+            ::deep .btn {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 50%;
+                border: 1px solid lightgray;
+                width: 1.8rem;
+                height: 1.8rem;
+            }
+        }
+    }
+
+    .cards-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 2rem 0 2rem 0;
+        gap: 1rem;
+
+        @media (max-width: 468px) {
+            margin: 1.5rem 0 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
+            position: relative;
+            border: none;
+
+            img.card-image {
+            }
+
+            .card-details {
+                position: absolute;
+                bottom: 1rem;
+                left: 1rem;
+                color: white;
+                margin-left: 0.5rem;
+
+                .card-company {
+                    font-size: 0.9rem;
+                }
+
+                .card-number {
+                    font-size: 1.2rem;
+                    letter-spacing: 0.1rem;
+                }
+
+                .name-expiry-container {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-weight: 300;
+                }
+
+                .card-holder {
+                    font-size: 1rem;
+                    margin-top: 0.5rem;
+                }
+
+                .card-expiry {
+                    font-size: 0.8rem;
+                    margin-top: 0.2rem;
+                }
+            }
+        }
+    }
+
+    ::deep.list-group {
+        background-color: white;
+        padding: 0 2rem 2rem 2rem;
+        width: 50vw;
+
+        @media (max-width: 468px) {
+            border-radius: 0;
+            padding: 0;
+            width: 100vw;
+        }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+
+            @media (max-width: 468px) {
+                border: none;
+                border-bottom: 1px solid lightgray;
+                border-radius: 0;
+            }
+
+            .address-container {
+                flex: 1;
+
+                .title {
+                    font-weight: 700;
+                }
+
+                .address {
+                }
+            }
+        }
+    }
+}

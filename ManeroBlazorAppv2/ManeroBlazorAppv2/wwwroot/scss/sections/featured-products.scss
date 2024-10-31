@@ -1,0 +1,68 @@
+@import '../core/mixins.scss';
+
+.featured-products {
+    display: grid;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+
+    .products-header {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        padding-bottom: 0.5rem;
+
+        h1 {
+            justify-self: start;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            justify-self: end;
+        }
+
+        .nav-link a {
+            text-decoration: none;
+            color: var(--color-black);
+            font-size: 0.8rem;
+        }
+    }
+
+    .product-list .product-img img {
+        height: 150px;
+        width: 150px;
+        object-fit: cover;
+    }
+
+    .product-list {
+        display: grid;
+        grid-template-rows: repeat(2, auto);
+        grid-template-columns: 1fr auto;
+        justify-content: space-between;
+        gap: 1rem;
+        font-size: 0.7rem;
+    }
+
+    @include md {
+        .products-header {
+            h1 {
+                font-size: 2.1rem;
+            }
+        }
+
+        .product-list {
+            display: grid;
+            place-items: center;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-rows: 1fr;
+            font-size: 1rem;
+        }
+
+        .product-list .product-img img {
+            height: 300px;
+            width: 300px;
+            object-fit: cover;
+        }
+    }
+}

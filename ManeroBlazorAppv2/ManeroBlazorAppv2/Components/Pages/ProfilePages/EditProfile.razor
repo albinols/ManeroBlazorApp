@@ -1,0 +1,196 @@
+﻿@page "/edit"
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+<PageTitle>Edit profile</PageTitle>
+
+@if (!isLoading)
+{
+    <div class="container">
+        <div class="header">
+            <NavLink href="/profile"><img src="/images/icons/arrow-left.svg" alt="previous page" /></NavLink>
+            <h1>Edit profile</h1>
+            <NavLink class="invisible-icon" href="/menu"><img src="/images/icons/arrow-left.svg" /></NavLink>
+        </div>
+
+        <div class="list-group">
+            <div class="list-group-item">
+                <img src="@applicationUser.ProfileImageUrl" class="profile-photo" alt="Profile photo" />
+                <label class="upload" for="fileUpload">
+                    <NavLink><img class="edit-icon" src="/images/icons/camera-filled.svg" /></NavLink>
+                    <InputFile OnChange="HandleFileChange" id="fileUpload" />
+                </label>
+            </div>
+
+            <EditForm Model="profile" OnSubmit="HandleSubmit" FormName="EditProfile" novalidate>
+                <DataAnnotationsValidator />
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="alert alert-danger">
+                        @ErrorMessage
+                    </div>
+                }
+
+                <div class="input-container">
+                    <div class="mb-3">
+                        <label for="nameInput" class="form-label">NAME</label>
+                        <InputText @bind-Value="profile.Name" class="form-control" id="nameInput" />
+                        <ValidationMessage For="@(() => profile.Name)" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailInput" class="form-label">EMAIL</label>
+                        <InputText @bind-Value="profile.Email" class="form-control" id="emailInput" />
+                        <ValidationMessage For="@(() => profile.Email)" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="phoneInput" class="form-label">PHONE NUMBER</label>
+                        <InputText @bind-Value="profile.PhoneNumber" class="form-control" id="phoneInput" />
+                        <ValidationMessage For="@(() => profile.PhoneNumber)" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="locationInput" class="form-label">LOCATION</label>
+                        <InputText @bind-Value="profile.Location" class="form-control" id="locationInput" />
+                        <ValidationMessage For="@(() => profile.Location)" />
+                    </div>
+                    <div class="btn-container">
+                        <button type="submit" class="btn btn-white">SAVE CHANGES</button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private EditProfileModel profile = new EditProfileModel();
+    private ApplicationUser applicationUser = new ApplicationUser();
+    private string ErrorMessage = "";
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = await UserManager.GetUserAsync(authState.User);
+
+            if (user != null)
+            {
+                profile.UserId = user.Id;
+                profile.Name = $"{user.Firstname} {user.Lastname}";
+                profile.Email = user.Email;
+                profile.PhoneNumber = user.PhoneNumber;
+                profile.Location = user.Location;
+
+                try
+                {
+                    var profilePictureUrl = await http.GetStringAsync($"https://profileimageprovider-manero.azurewebsites.net/api/profilepicture/{user.Id}?code=OTTJV8bLm1xkPXv_b35ynJuFRSkVB6hqmFq2ZpKzI7DQAzFuxDt9eA%3D%3D");
+                    if (!string.IsNullOrEmpty(profilePictureUrl))
+                    {
+                        applicationUser.ProfileImageUrl = profilePictureUrl;
+                    }
+                    else
+                    {
+                        applicationUser.ProfileImageUrl = null;
+                    }
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    applicationUser.ProfileImageUrl = null;
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = $"An error occurred while loading the profile picture: {ex.Message}";
+                }
+                finally
+                {
+                    isLoading = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while loading the profile.";
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                var content = new MultipartFormDataContent();
+                var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 10_000_000)); // Max 10mb
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                content.Add(fileContent, "file", file.Name);
+
+                var response = await http.PostAsync($"https://profileimageprovider-manero.azurewebsites.net/api/upload/{profile.UserId}?code=koQ07kiwy45-2DxwdKHnMZEk6XkN1feQRVfbW-zuCgDvAzFuKyIzzg%3D%3D", content);
+                response.EnsureSuccessStatusCode();
+
+                var profilePictureUrl = await response.Content.ReadAsStringAsync();
+                profile.ProfileImageUrl = profilePictureUrl;
+                applicationUser.ProfileImageUrl = profilePictureUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error uploading profile picture: {ex.Message}";
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        ErrorMessage = "";
+
+        if (!string.IsNullOrEmpty(profile.Email))
+        {
+            try
+            {
+                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                var user = await UserManager.GetUserAsync(authState.User);
+
+                if (user != null)
+                {
+                    var names = profile.Name.Split(' ');
+                    if (names.Length >= 2)
+                    {
+                        user.Firstname = names[0];
+                        user.Lastname = names[1];
+                    }
+                    else
+                    {
+                        ErrorMessage = "Name must contain at least a first name and a last name.";
+                        return;
+                    }
+
+                    user.Email = profile.Email;
+                    user.PhoneNumber = profile.PhoneNumber;
+                    user.Location = profile.Location;
+                    user.ProfileImageUrl = profile.ProfileImageUrl;
+
+                    var result = await UserManager.UpdateAsync(user);
+                    if (result.Succeeded)
+                    {
+                        NavigationManager.NavigateTo("/profile");
+                    }
+                    else
+                    {
+                        ErrorMessage = "An error occurred when updating your profile, please try again!";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An error occurred when updating your profile, please try again!";
+            }
+        }
+    }
+}

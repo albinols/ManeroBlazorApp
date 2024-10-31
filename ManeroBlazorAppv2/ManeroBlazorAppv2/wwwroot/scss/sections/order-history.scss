@@ -1,0 +1,169 @@
+﻿@import '../core/mixins.scss';
+
+.order-history-container {
+    padding: 0;
+
+    .order-history-header {
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 1rem 1rem;
+
+        .order-history-back-button {
+            background-color: white;
+            color: white;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
+        .order-history-section-title {
+            font-weight: 500;
+            font-size: 18px;
+            flex: 1;
+            text-align: center;
+        }
+    }
+
+    .no-orders-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        row-gap: 0.5rem;
+        margin-top: 15%;
+
+        .no-orders-message {
+            font-size: 18px;
+            color: var(--color-black);
+        }
+
+        .no-orders-link {
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--color-black);
+        }
+
+        .no-orders-link:hover {
+            color: grey
+        }
+    }
+
+    .order-history-list {
+
+        @include s {
+            border: 2px solid rgba(219, 227, 245, 0.5);
+        }
+
+        .order-history-complete {
+            border-bottom: 5px solid rgba(219, 227, 245, 0.5);
+            cursor: pointer;
+
+            .order-history-summary {
+                display: flex;
+                flex-direction: column;
+                padding: 1rem 1rem;
+                row-gap: 0.5rem;
+
+                .order-history-order-number {
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+
+                .order-history-date-sum {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+
+                    .order-history-order-date {
+                        font-size: 14px;
+                        color: var(--color-grey-500);
+                    }
+
+                    .order-history-total {
+                        font-size: 14px;
+                        font-weight: bold;
+                    }
+                }
+            }
+
+            .order-history-details-container {
+                background-color: rgba(219, 227, 245, 0.3);
+                padding: 1rem 1rem;
+                border-top: 5px solid rgba(219, 227, 245, 0.5);
+                color: var(--color-grey-500);
+                font-size: 14px;
+
+
+                .order-history-details {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 1rem;
+                    margin-bottom: 0.5rem;
+
+                    .order-history-product-name {
+                        flex: 1;
+                        word-break: break-word;
+                    }
+
+                    .order-history-quantity-price {
+                        display: flex;
+                        align-items: center;
+
+                        .order-history-quantity {
+                            white-space: nowrap;
+                            width: 50px;
+                            text-align: right;
+                        }
+
+                        .order-history-price {
+                            white-space: nowrap;
+                            width: 70px;
+                            text-align: right;
+                        }
+                    }
+                }
+
+                .order-history-track-order-button-container {
+                    display: flex;
+                    align-items: center;
+                    justify-content: start;
+                    margin-top: 1rem;
+
+                    .order-track-small-image {
+                        height: 30px;
+                        width: 30px;
+                        object-fit: contain;
+                        margin-right: 0.5rem;
+
+                    }
+
+                    .order-history-track-order-button {
+                        font-size: 16px;
+                        font-weight: 500;
+                        color: var(--color-black);
+
+                        &:hover {
+                            color: var(--color-grey-500);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@include md {
+    .order-history-container {
+        width: 60%;
+        padding-top: 2rem;
+    }
+}
+
+@include lg {
+    .order-history-container {
+        width: 50%;
+    }
+}

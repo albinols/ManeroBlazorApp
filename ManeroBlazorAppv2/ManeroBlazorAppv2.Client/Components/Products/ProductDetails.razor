@@ -1,0 +1,211 @@
+﻿@inject HttpClient http
+@inject IProductService productService
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject ShoppingCartService shoppingCartService
+
+@rendermode InteractiveAuto
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger">@errorMessage</div>
+}
+else if (product == null)
+{
+	<ManeroBlazorAppv2.Client.Components.Pages.Loading />
+}
+else
+{
+	<div class="product-container">
+		<div class="carousel-container">
+			<div id="carouselControls" class="carousel slide" data-ride="carousel" data-interval="false">
+				<div class="carousel-inner">
+					@if (selectedImages != null)
+					{
+						for (int i = 0; i < selectedImages.Count; i++)
+						{
+							<div class="carousel-item @(i == currentImageIndex ? "active" : "")">
+								<div class="images-container">
+									<img class="product-images" src="@selectedImages[i]">
+								</div>
+							</div>
+						}
+					}
+					else
+					{
+						<div class="carousel-item active">
+							<img class="product-images" src="/images/other/dependency-injection-tshirt.jpeg" style="width: 100vh; height: auto;">
+						</div>
+					}
+				</div>
+			</div>
+			<div class="details-navbar">
+				@foreach (var image in selectedImages)
+				{
+					if (selectedImages.IndexOf(image) == currentImageIndex)
+					{
+						<span class="details-navbar-active"></span>
+					}
+					else
+					{
+						<div class="details-navbar-inactive" @onclick="() => SetCurrentImage(image)"></div>
+					}
+				}
+			</div>
+		</div>
+		<h2 class="title-name">@product.Name</h2>
+		<div class="rating-container">
+			@if (product.Rating.HasValue)
+			{
+				<div class="rating">
+					@for (int i = 0; i < Math.Round(product.Rating.Value); i++)
+					{
+						<span class="star">&#9733;</span>
+					}
+					@for (int i = (int)Math.Round(product.Rating.Value); i < 5; i++)
+					{
+						<span class="star">&#9734;</span>
+					}
+				</div>
+				<div class="numeric-rating">
+					(@product.Rating.Value.ToString("0.#"))
+				</div>
+			}
+		</div>
+		<div class="price-counter">
+			<p class="product-price">$@product.Price</p>
+			<ProductCounter @bind-Quantity="selectedQuantity" />
+		</div>
+		<p>Size</p>
+		<div class="sizes-container">
+			@foreach (var size in product.Sizes)
+			{
+				<button class="btn @(selectedSize == size ? "active" : "")" @onclick="() => SelectSize(size)">@size</button>
+			}
+		</div>
+		<div class="colors-container">
+			<p>
+				Color
+				@foreach (var color in product.Colors)
+				{
+					<button class="btn @(selectedColor == color ? "active" : "")" @onclick="() => SelectColor(color)" style="background-color: @(color.ToLower());"></button>
+				}
+			</p>
+		</div>
+		<p>Description</p>
+		<p class="details-description">@product.Description</p>
+		<div class="add-to-cart">
+			<button @onclick="() => AddToCart()" class="btn btn-white btn-add-to-cart">+ ADD TO CART</button>
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter]
+	public string Id { get; set; }
+	[Parameter]
+	public int counterQuantity { get; set; }
+	public Product product;
+	private string selectedSize;
+	private string selectedColor;
+	private Product selectedProduct;
+	private List<string> selectedImages;
+	private int currentImageIndex = 0;
+	private int selectedQuantity = 1;
+	private string errorMessage;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadProductDetailsAsync();
+		currentImageIndex = 0;
+	}
+
+	private async Task LoadProductDetailsAsync()
+	{
+		try
+		{
+			if (!string.IsNullOrEmpty(Id))
+			{
+				product = await productService.GetProductById(Id);
+				if (product != null)
+				{
+					SelectColor(product.Colors.FirstOrDefault());
+				}
+				else
+				{
+					errorMessage = "Product not found.";
+				}
+			}
+			else
+			{
+				errorMessage = "Invalid product ID.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = "Could not load product details. Try again later.";
+			Console.Error.WriteLine(ex);
+		}
+	}
+
+
+	private void SelectSize(string size)
+	{
+		selectedSize = size;
+	}
+
+	private void SelectColor(string color)
+	{
+		try
+		{
+			selectedColor = color;
+			selectedImages = product.ColorImageUrls[color];
+			if (selectedImages == null || !selectedImages.Any())
+			{
+				selectedImages = new List<string> { };
+			}
+			currentImageIndex = 0;
+		}
+		catch (Exception ex)
+		{
+			errorMessage = "Could not select. Try again later.";
+			Console.Error.WriteLine(ex);
+		}
+	}
+
+	private void SetCurrentImage(string imageUrl)
+	{
+		currentImageIndex = selectedImages.IndexOf(imageUrl);
+	}
+
+	public async Task AddToCart()
+	{
+		try
+		{
+			var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+			var user = authState.User;
+
+			if (user.Identity.IsAuthenticated)
+			{
+				var item = new ShoppingCartItemModel
+					{
+						CustomerId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+						ProductId = Id,
+						Quantity = selectedQuantity,
+						Size = selectedSize,
+						Color = selectedColor
+					};
+				await shoppingCartService.AddToCartAsync(item);
+			}
+			else
+			{
+				NavigationManager.NavigateTo("/login");
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = "Could not add product to cart. Try again later.";
+			Console.Error.WriteLine(ex);
+		}
+	}
+}

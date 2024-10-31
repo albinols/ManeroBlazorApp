@@ -1,0 +1,11 @@
+﻿
+.search-result-text{
+    display:flex;
+    flex-direction:row;
+    align-content:center;
+    justify-content:center;
+    
+    .bold{
+        font-weight:bold;
+    }
+}

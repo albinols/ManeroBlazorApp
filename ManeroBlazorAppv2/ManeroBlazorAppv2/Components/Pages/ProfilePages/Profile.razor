@@ -1,0 +1,118 @@
+﻿@page "/profile"
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthService AuthService
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+<PageTitle>My profile</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        @if (user == null)
+        {
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+                <div>Loading...</div>
+            </div>
+        }
+        else
+        {
+            <div class="container">
+                <div class="header">
+                    <BurgerMenu />
+                    <h1>My profile</h1>
+                    <NavLink href="/shoppingcart"><img src="/images/icons/bag.svg" alt="shoppingcart" /></NavLink>
+                </div>
+
+                <nav class="list-group">
+                    <div class="list-group-item profile-section">
+                        @if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+                        {
+                            <img src="@user.ProfileImageUrl" class="profile-photo" alt="Profile photo" />
+                        }
+                        else
+                        {
+                            <img src="/images/profile-placeholder.jpg" class="profile-photo" alt="Profile photo" />
+                        }
+                        <NavLink href="/edit"><img class="edit-icon" src="/images/icons/edit-filled.svg" /></NavLink>
+                    </div>
+                    <div class="list-group-item sub-profile">
+                        <div class="name">@user.Firstname @user.Lastname</div>
+                        <div class="email">@user.Email</div>
+                    </div>
+                    <NavLink href="@($"/orderhistory/{user.Id}")" class="list-group-item"><div class="img-container"><img class="menu-icons" src="/images/icons/calendar.svg" /></div>Order history</NavLink>
+                    <NavLink href="/card-overview" class="list-group-item"><div class="img-container"><img class="menu-icons" src="/images/icons/creditcard.svg" /></div>Payment method</NavLink>
+                    <NavLink href="/myaddress" class="list-group-item"><div class="img-container"><img class="menu-icons" src="/images/icons/pin.svg" /></div>My address</NavLink>
+                    <NavLink href="/mypromocodes" class="list-group-item"><div class="img-container"><img class="menu-icons" src="/images/icons/promocodes.svg" /></div>My promocodes</NavLink>
+                    <NavLink @onclick="(() => showSignOut = true)" class="list-group-item pointer">
+                        <div class="img-container"><img class="menu-icons" src="/images/icons/logout.svg" /></div>
+                        Sign out
+                    </NavLink>
+                </nav>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+            <div>You are not authorized to view this page. Redirecting to login...</div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@if (showSignOut)
+{
+    <SignOut OnConfirmation="SignOut" />
+}
+
+@code {
+    bool showSignOut = false;
+    private ApplicationUser user;
+    private string ErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var username = authState.User?.Identity?.Name;
+
+        if (username == null)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(username))
+        {
+            user = await UserManager.FindByNameAsync(username);
+
+            try
+            {
+                var profilePictureUrl = await http.GetStringAsync($"https://profileimageprovider-manero.azurewebsites.net/api/profilepicture/{user.Id}?code=OTTJV8bLm1xkPXv_b35ynJuFRSkVB6hqmFq2ZpKzI7DQAzFuxDt9eA%3D%3D");
+                if (!string.IsNullOrEmpty(profilePictureUrl))
+                {
+                    user.ProfileImageUrl = profilePictureUrl;
+                }
+                else
+                {
+                    user.ProfileImageUrl = null;
+                }
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                user.ProfileImageUrl = null;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"An error occurred while loading the profile picture: {ex.Message}";
+            }
+        }
+    }
+
+    public async Task SignOut(bool result)
+    {
+        if (!result)
+        {
+            showSignOut = false;
+        }
+    }
+}

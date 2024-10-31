@@ -1,0 +1,90 @@
+﻿@page "/updateaddress/{id}"
+@using Newtonsoft.Json
+@inject IAddressService AddressService
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@* @attribute [StreamRendering] *@
+@rendermode InteractiveAuto
+
+<PageTitle>Edit Address</PageTitle>
+
+<div class="container">
+    <div class="header">
+        <NavLink href="/myaddress"><img src="/images/icons/arrow-left.svg" alt="previous page" /></NavLink>
+        <h1>Edit Address</h1>
+        <NavLink class="invisible-icon" href="/menu"><img src="/images/icons/arrow-left.svg" /></NavLink>
+    </div>
+
+    <EditForm Model="updateAddress" OnSubmit="UpdateAddressFunction" FormName="UpdateAddress" novalidate>
+        <DataAnnotationsValidator />
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger">
+                @ErrorMessage
+            </div>
+        }
+
+        <div class="input-container">
+            <div class="mb-3">
+                <label for="titleInput" class="form-label">TITLE</label>
+                <InputText @bind-Value="updateAddress.Title" class="form-control" id="titleInput" />
+                <ValidationMessage For="@(() => updateAddress.Title)" />
+            </div>
+            <div class="mb-3">
+                <label for="addressInput" class="form-label">ENTER A NEW ADDRESS</label>
+                <InputText @bind-Value="updateAddress.Address" class="form-control" id="addressInput" />
+                <ValidationMessage For="@(() => updateAddress.Address)" />
+            </div>
+            <div class="btn-container">
+                <button type="submit" class="btn btn-white">UPDATE ADDRESS</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+
+    private UpdateAddressModel updateAddress = new UpdateAddressModel();
+    private string ErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            updateAddress = await AddressService.GetAddressById(id);
+        }
+        catch (HttpRequestException httpRequestException)
+        {
+            ErrorMessage = httpRequestException.Message;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    public async Task UpdateAddressFunction()
+    {
+        ErrorMessage = "";
+
+        try
+        {
+            var error = await AddressService.UpdateAddress(id, updateAddress);
+            if (string.IsNullOrEmpty(error))
+            {
+                NavigationManager.NavigateTo("/myaddress");
+            }
+            else
+            {
+                ErrorMessage = error;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,52 @@
+.star-rating {
+    font-size: 0;
+}
+
+.star-rating::before {
+    content: '?????';
+    letter-spacing: 5px;
+    color: #ffd700;
+}
+
+.star-rating[data-rating="1"]::before {
+    content: '?????';
+}
+
+.star-rating[data-rating="2"]::before {
+    content: '?????';
+}
+
+.star-rating[data-rating="3"]::before {
+    content: '?????';
+}
+
+.star-rating[data-rating="4"]::before {
+    content: '?????';
+}
+
+.star-rating[data-rating="5"]::before {
+    content: '?????';
+}
+
+.rating-container {
+    display: flex;
+    align-items: center;
+}
+
+.rating-stars {
+    margin-right: 5px;
+}
+
+.star {
+    color: gold;
+}
+
+.numeric-rating {
+    font-size: 0.8rem;
+}
+
+.rating-container {
+    display: grid;
+    align-items: center;
+    grid-template-columns: auto auto auto auto 1fr;
+}

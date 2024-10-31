@@ -1,0 +1,88 @@
+﻿@page "/ordersuccess"
+@inject CheckoutService CheckoutService
+@inject NavigationManager NavigationManager
+@using System.Globalization
+@rendermode InteractiveServer
+
+@* <div class="container order-outcome-container">
+	<div class="order-outcome-image">
+		<img src="/images/icons/order-success.svg" alt="Order success" />
+	</div>
+	<div class="order-outcome-message">
+		<div class="order-outcome-message-title">Thank you for your order!</div>
+		<div class="order-outcome-message-text">Your order will be delivered on time.</div>
+		<div class="order-outcome-message-text">Thank you!</div>
+	</div>
+	<div class="order-summary">
+		<h2>Order Summary</h2>
+		<div class="order-summary-item"><strong>Order Number:</strong> @CheckoutService.CurrentOrder.OrderNumber</div>
+		<div class="order-summary-item"><strong>Estimated Delivery Date:</strong> @CheckoutService.CurrentOrder.DeliveryDate.ToShortDateString()</div>
+		<div class="order-summary-item"><strong>Payment Method:</strong> @CheckoutService.CurrentOrder.MaskedCardNumber</div>
+		<h3>Items:</h3>
+		<ul>
+			@foreach (var item in CheckoutService.CurrentOrder.OrderItems)
+			{
+				<li>@item.ProductName - @item.Quantity x @item.UnitPrice</li>
+			}
+		</ul>
+		<div class="order-summary-item"><strong>Total Amount:</strong> $@CheckoutService.CurrentOrder.TotalAmount</div>
+	</div>
+	<div class="order-outcome-button-container">
+		<button type="button" class="btn btn-white order-outcome-button" @onclick="GoToPage">OK</button>
+	</div>
+	<NavLink href="/" class="order-outcome-continue">CONTINUE SHOPPING</NavLink>
+</div> *@
+@if (CheckoutService.CurrentOrder == null)
+{
+	<div class="container">
+		<p>No order details found. Please return to the homepage.</p>
+		<button class="btn btn-white" @onclick="GoToPage">Go to Homepage</button>
+	</div>
+}
+else
+{
+	<div class="container order-outcome-container">
+		<div class="order-outcome-image">
+			<img src="/images/icons/order-success.svg" alt="Order success" />
+		</div>
+		<div class="order-outcome-message">
+			<div class="order-outcome-message-title">Thank you for your order!</div>
+		</div>
+		<div class="order-outcome-summary">
+			<div class="order-outcome-order-number">#@CheckoutService.CurrentOrder.OrderNumber</div>
+			<div class="order-outcome-product-container">
+				@foreach (var item in CheckoutService.CurrentOrder.OrderItems)
+				{
+					<div class="order-outcome-product-list">
+						<div class="order-outcome-product-name">@item.ProductName</div>
+						<div class="order-outcome-quantity-price">
+							<div class="order-outcome-quantity">@item.Quantity x</div>
+							<div class="order-outcome-price">$@item.UnitPrice</div>
+						</div>
+					</div>
+				}
+			</div>
+			<div class="order-outcome-total-container">
+				<div class="order-outcome-total-text">Total Amount</div>
+				<div class="order-outcome-total">$@CheckoutService.CurrentOrder.TotalAmount.ToString("0.##")</div>
+			</div>
+			<div class="order-outcome-delivery-container">
+				<div class="order-outcome-delivery-text">Delivery Date</div>
+				<div class="order-outcome-delivery">@CheckoutService.CurrentOrder.DeliveryDate.ToString("MMM dd", new CultureInfo("en-US"))</div>
+			</div>	
+		</div>
+		<div class="order-outcome-button-container">
+			<button type="button" class="btn btn-white order-outcome-button" @onclick="GoToPage">OK</button>
+		</div>
+		<NavLink href="/" class="order-outcome-continue">CONTINUE SHOPPING</NavLink>
+	</div>
+}
+
+@code {
+
+	private void GoToPage()
+	{
+		CheckoutService.ResetCheckout();
+		NavigationManager.NavigateTo("/");
+	}
+}

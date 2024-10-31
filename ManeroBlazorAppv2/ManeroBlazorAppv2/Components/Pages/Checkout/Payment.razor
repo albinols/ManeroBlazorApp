@@ -1,0 +1,109 @@
+﻿@page "/payment"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject CheckoutService CheckoutService
+@rendermode InteractiveServer
+
+@if (cards == null)
+{
+    <p>Loading...</p>
+}
+else if (!cards.Any())
+{
+    <div class="container checkout-payment-container">
+        <header class="checkout-payment-header">
+            <button class="checkout-payment-back-button" @onclick="GoBack">
+                <img src="/images/icons/arrow-left.svg" alt="arrow left" />
+            </button>
+            <div class="checkout-payment-section-title">Payment method</div>
+        </header>
+        <div class="no-payment-container">
+            <div class="no-payment-message">No payment options found</div>
+            <NavLink class="no-payment-link" href="/card-overview">Add payment options here</NavLink>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container checkout-payment-container">
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger">@ErrorMessage</div>
+        }
+        <header class="checkout-payment-header">
+            <button class="checkout-payment-back-button" @onclick="GoBack">
+                <img src="/images/icons/arrow-left.svg" alt="arrow left" />
+            </button>
+            <div class="checkout-payment-section-title">Payment method</div>
+        </header>
+        <div class="checkout-payment-options-title">Credit Cards</div>
+        <div class="checkout-payment-options">
+            @foreach (var card in cards)
+            {
+                <div class="checkout-payment-card-container border-bottom border-2 payment-custom-border-color">
+                    <div class="checkout-payment-details">
+                        <div class="checkout-payment-company">@card.PaymentCompany</div>
+                        <div class="checkout-payment-card">@MaskCardNumber(card.CardNumber)</div>
+                    </div>
+                    <input type="radio" name="payment" value="@card.CardNumber" @onchange="() => SelectPayment(card)">
+                </div>
+            }
+        </div>
+    </div>
+}
+
+
+@code {
+    private List<PaymentModel> cards;
+    private string ErrorMessage = "";
+    private string selectedPaymentMethod;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(CheckoutService.UserId))
+        {
+            ErrorMessage = "User ID is not available. Please go back to the checkout page.";
+            return;
+        }
+
+        try
+        {
+            cards = await HttpClient.GetFromJsonAsync<List<PaymentModel>>($"https://paymentprovider-manero.azurewebsites.net/api/GetAllCards/{CheckoutService.UserId}?code=iM385-C6BXqFAchQ0u-CqRak3--f1CIHC7p0iQk3iKGJAzFuV5D8Mg%3D%3D");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred while fetching payment cards: {ex.Message}";
+        }
+    }
+
+    private string MaskCardNumber(string cardNumber)
+    {
+        if (cardNumber.Length < 4)
+            return cardNumber;
+
+        return new string('*', cardNumber.Length - 4) + cardNumber[^4..];
+    }
+
+
+    private void SelectPayment(PaymentModel card)
+    {
+        selectedPaymentMethod = MaskCardNumber(card.CardNumber);
+        CheckoutService.PaymentMethod = selectedPaymentMethod;
+        CheckoutService.MaskedCardNumber = selectedPaymentMethod;
+        CheckoutService.PaymentId = card.Id;
+        ErrorMessage = "";
+    }
+
+    private void GoBack()
+    {
+        if (string.IsNullOrEmpty(selectedPaymentMethod))
+        {
+            ErrorMessage = "Please select a payment method before proceeding.";
+        }
+        else
+        {
+            ErrorMessage = "";
+            NavigationManager.NavigateTo("/checkout");
+        }
+    }
+}

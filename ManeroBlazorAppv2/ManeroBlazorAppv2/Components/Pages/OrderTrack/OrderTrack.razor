@@ -1,0 +1,131 @@
+﻿@page "/ordertrack/{userId}/{orderId}"
+@inject IOrderService OrderService
+@inject NavigationManager NavigationManager
+@using System.Globalization
+@rendermode InteractiveServer
+
+@if (order == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="container order-track-container">
+        <header class="order-track-header">
+            <button class="order-track-back-button" @onclick="GoBack">
+                <img src='/images/icons/arrow-left.svg' alt="arrow left" />
+            </button>
+            <div class="order-track-section-title">Track your order</div>
+        </header>
+        <div class="order-track-order">
+            <div class="order-track-image">
+                <img src='/images/icons/order-track.svg' alt="Track order" />
+            </div>
+            <div class="order-track-order-text">Your order:</div>
+            <div class="order-track-order-number">#@order.OrderNumber</div>
+        </div>
+        <div class="container order-track-status-container">
+            <div class="order-track-status-section">
+                <div class="order-track-status-visual-container">
+                    <div class="order-track-status-circle-container">
+                        <div class="order-track-status-circle @(IsFilled("Created") ? "filled" : "")">
+                            <div class="order-track-inner-circle"></div>
+                        </div>
+                    </div>
+                    <div class="order-track-status-line-container">
+                        <img src='/images/icons/order-line.svg' alt="line down" class="order-track-status-line"/>
+                    </div>
+                </div>
+                <div class="order-track-status-text-container">
+                    <div class="order-track-status-title">Order created</div>
+                    <div class="order-track-status-text">We have received your order</div>
+                </div>
+            </div>
+            <div class="order-track-status-section">
+                <div class="order-track-status-visual-container">
+                    <div class="order-track-status-circle-container">
+                        <div class="order-track-status-circle @(IsFilled("Confirmed") ? "filled" : "")">
+                            <div class="order-track-inner-circle"></div>
+                        </div>
+                    </div>
+                    <div class="order-track-status-line-container">
+                        <img src='/images/icons/order-line.svg' alt="line down" class="order-track-status-line"/>
+                    </div>
+                </div>
+                <div class="order-track-status-text-container">
+                    <div class="order-track-status-title">Order confirmed</div>
+                    <div class="order-track-status-text">Your order has been confirmed</div>
+                </div>
+            </div>
+            <div class="order-track-status-section">
+                <div class="order-track-status-visual-container">
+                    <div class="order-track-status-circle-container">
+                        <div class="order-track-status-circle @(IsFilled("Shipping") ? "filled" : "")">
+                            <div class="order-track-inner-circle"></div>
+                        </div>
+                    </div>
+                    <div class="order-track-status-line-container">
+                        <img src='/images/icons/order-line.svg' alt="line down" class="order-track-status-line"/>
+                    </div>
+                </div>
+                <div class="order-track-status-text-container">
+                    <div class="order-track-status-title">Order shipping</div>
+                    <div class="order-track-status-text">Estimated for @order.DeliveryDate.ToString("MMM dd, yyyy", new CultureInfo("en-US"))</div>
+                </div>
+            </div>
+            <div class="order-track-status-section">
+               <div class="order-track-status-visual-container">
+                    <div class="order-track-status-circle-container">
+                        <div class="order-track-status-circle @(IsFilled("Delivered") ? "filled" : "")">
+                            <div class="order-track-inner-circle"></div>
+                        </div>
+                    </div>
+                    <div class="order-track-status-line-container">
+                        
+                    </div>
+                </div>
+                <div class="order-track-status-text-container">
+                    <div class="order-track-status-title">Order delivered</div>
+                    <div class="order-track-status-text">Your order has been delivered</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public string userId { get; set; }
+    [Parameter]
+    public string orderId { get; set; }
+    private OrderResponseModel order;
+    private string ErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            order = await OrderService.GetOrderAsync(orderId);
+
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error fetching orders: {ex.Message}";
+        }
+    }
+
+     private bool IsFilled(string status)
+    {
+        var statuses = new List<string> { "Created", "Confirmed", "Shipping", "Delivered" };
+        int currentIndex = statuses.IndexOf(order.OrderStatus);
+        int checkIndex = statuses.IndexOf(status);
+
+        return checkIndex <= currentIndex;
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo($"/orderhistory/{userId}");
+    }
+}

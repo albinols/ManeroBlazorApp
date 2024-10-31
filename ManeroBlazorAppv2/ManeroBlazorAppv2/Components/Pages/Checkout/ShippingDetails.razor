@@ -1,0 +1,108 @@
+﻿@page "/shippingdetails"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject CheckoutService CheckoutService
+@rendermode InteractiveServer
+
+@if (addresses == null)
+{
+	<p>Loading...</p>
+}
+else
+{
+	<div class="container shipping-container shipping-custom-border-color">
+		@if (!string.IsNullOrEmpty(ErrorMessage))
+		{
+			<div class="alert alert-danger shipping-alert">@ErrorMessage</div>
+		}
+		<header class="shipping-header">
+			<button class="shipping-back-button" @onclick="GoBack">
+				<img src="/images/icons/arrow-left.svg" alt="arrow left" />
+			</button>
+			<div class="shipping-section-title">Shipping details</div>
+		</header>
+		<div class="shipping-empty-image">
+		</div>
+		<div class="shipping-address-options">
+			@foreach (var address in addresses)
+			{
+				<div class="shipping-address-container border-bottom border-2 shipping-custom-border-color">
+					<div class="shipping-address-details">
+						<div class="shipping-address-type">@address.Title</div>
+						<div class="shipping-address">@address.Address</div>
+					</div>
+					<input type="radio" name="address" value="@address.Address" @onchange="SelectAddress">
+				</div>
+			}
+		</div>
+		<div class="shipping-custom-address-container">
+			<div class="shipping-address-input mb-3">
+				<div class="shipping-address-label">ENTER AN ADDRESS</div>
+				<input type="text" placeholder="Enter an address" @bind="NewAddress" class="shipping-custom-address-input" />
+			</div>
+			<input type="radio" class="shipping-custom-radio" name="address" value="@NewAddress" @onchange="SelectCustomAddress">
+		</div>
+	</div>	
+}
+
+@code {
+	private AddressModel[] addresses;
+	private string selectedAddress;
+	private string NewAddress { get; set; }
+	private string ErrorMessage = "";
+	private bool isCustomAddressSelected;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			if (string.IsNullOrEmpty(CheckoutService.UserId))
+			{
+				ErrorMessage = "User ID is not available. Please go back to the checkout page.";
+				return;
+			}
+
+			addresses = await HttpClient.GetFromJsonAsync<AddressModel[]>($"https://addressprovider-manero.azurewebsites.net/api/GetAllAddresses/{CheckoutService.UserId}?code=nsu9uOxPNJk_FCt__m0hTlTeewvaFmZmlLcbC9RUO928AzFu24uWMw%3D%3D");
+		}
+		catch (Exception ex)
+		{
+			ErrorMessage = $"An error occurred: {ex.Message}";
+		}
+	}
+
+	private void SelectAddress(ChangeEventArgs e)
+	{
+		selectedAddress = e.Value.ToString();
+		CheckoutService.ShippingAddress = selectedAddress;
+		isCustomAddressSelected = false;
+		ErrorMessage = "";
+	}
+
+	private void SelectCustomAddress(ChangeEventArgs e)
+	{
+		isCustomAddressSelected = true;
+		selectedAddress = null;
+		ErrorMessage = "";
+	}
+
+	private void GoBack()
+	{
+		if (isCustomAddressSelected && string.IsNullOrEmpty(NewAddress))
+		{
+			ErrorMessage = "Please enter an address.";
+		}
+		else if (!isCustomAddressSelected && string.IsNullOrEmpty(selectedAddress))
+		{
+			ErrorMessage = "Please select an address.";
+		}
+		else
+		{
+			if (isCustomAddressSelected)
+			{
+				CheckoutService.ShippingAddress = NewAddress;
+			}
+			ErrorMessage = "";
+			NavigationManager.NavigateTo("/checkout");
+		}
+	}
+}

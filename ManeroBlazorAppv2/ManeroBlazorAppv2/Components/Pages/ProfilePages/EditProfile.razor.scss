@@ -1,0 +1,118 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3rem;
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 46vw;
+
+        @media (max-width: 468px) {
+            width: 90vw;
+        }
+
+        a {
+            img {
+                margin-top: -10px;
+            }
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-left: -1rem;
+        }
+
+        a.invisible-icon {
+            img {
+                display: none;
+            }
+        }
+    }
+
+    .list-group {
+        background-color: white;
+        padding: 0 2rem 2rem 2rem;
+        width: 50vw;
+
+        @media (max-width: 468px) {
+            width: 100vw;
+        }
+
+        .list-group-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 0 1rem 0;
+            margin-bottom: 2rem;
+            border: none;
+
+            .profile-photo {
+                border-radius: 50%;
+                border: 6px solid #DBE3F5;
+                display: flex;
+                width: 140px;
+                height: 140px;
+                position: relative;
+            }
+
+            .upload {
+                cursor: pointer;
+
+                ::deep input {
+                    display: none;
+                }
+            }
+
+            .edit-icon {
+                position: absolute;
+                border-radius: 50%;
+                margin-left: 1.7rem;
+                margin-top: -3rem;
+            }
+        }
+
+        ::deep form {
+            .input-container {
+                margin-top: 1rem;
+
+                .mb-3 {
+                    position: relative;
+
+                    .form-label {
+                        position: absolute;
+                        margin-top: -8px;
+                        margin-left: 20px;
+                        background-color: white;
+                        padding: 0 10px;
+                        color: #626262;
+                        font-size: 0.8rem;
+                    }
+
+                    .form-control {
+                        margin-bottom: 1rem;
+                        border-radius: 2rem;
+                        padding: 0.6rem 1.8rem;
+                    }
+                }
+            }
+
+            .btn-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                .btn {
+                    border-radius: 2rem;
+                    width: 100vw;
+                    margin-top: 0.5rem;
+                    padding: 0.7rem 0;
+                }
+            }
+        }
+    }
+}

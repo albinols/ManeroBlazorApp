@@ -1,0 +1,28 @@
+﻿@page "/accountcreated"
+@rendermode InteractiveServer
+
+<div class="icon-manero">
+    <img id="maneroicon" src="/images/icons/manero-icon.svg" alt="accountcreated" />
+</div>
+<div class="svg-container">
+    
+    <img src="/images/icons/account-created.svg" alt="accountcreated" />
+</div>
+
+<div class=" form-div container">
+    
+
+    <h1>Account created</h1>
+    <p> Your account have been created successfully</p>
+
+
+    <button type="button" @onclick="transferToLogin" class="btn btn-white">OK</button>
+
+
+</div>
+
+@code {
+    private void transferToLogin(){
+        NavigationManager.NavigateTo("/login");
+    }
+}

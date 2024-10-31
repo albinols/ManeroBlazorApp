@@ -1,0 +1,26 @@
+﻿@page "/orderfailure"
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<div class="container order-outcome-container">
+	<div class="order-outcome-image">
+		<img src="/images/icons/order-failure.svg" alt="Order failure" />
+	</div>
+	<div class="order-outcome-message">
+		<div class="order-outcome-message-title">Sorry! Your order has failed!</div>
+		<div class="order-outcome-message-text">Something went wrong.</div>
+		<div class="order-outcome-message-text">Please try again.</div>
+	</div>
+	<div class="order-outcome-button-container">
+		<button type="button" class="btn btn-white order-outcome-button" @onclick="GoToPage">TRY AGIAN</button>
+	</div>
+	<NavLink href="/profile" class="order-outcome-continue">GO TO MY PROFILE</NavLink>
+</div>
+
+@code {
+
+	private void GoToPage()
+	{
+		NavigationManager.NavigateTo("/checkout");
+	}
+}

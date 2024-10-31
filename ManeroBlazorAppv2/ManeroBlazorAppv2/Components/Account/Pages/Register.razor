@@ -1,0 +1,109 @@
+﻿@page "/signup"
+
+@rendermode InteractiveServer
+
+
+<PageTitle>Sign Up</PageTitle>
+
+<div class="form-header">
+
+    <div class="form-header-image"><NavLink href="/"><img src="/images/icons/arrow-left.svg" alt="arrow left" /></NavLink></div>
+    <div class="form-header-text">
+        <h5>Sign up</h5>
+    </div>
+</div>
+
+<div class="form-div container">
+
+    <h1>Sign Up</h1>
+    
+       <EditForm Model="model" OnValidSubmit="OnValidSubmit" FormName="SignUpForm" novalidate>
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger">
+                    @ErrorMessage
+                </div>
+            }
+
+        <div class="form-group">
+            <label class="form-label">First Name</label>
+            <InputText @bind-Value=model.FirstName placeholder="Enter your first name" class="form-control" />
+            <ValidationMessage For="@(() => model.FirstName)" class="validationsMessage" />
+        </div>
+        <div class="form-group ">
+            <label class="form-label">Last Name</label>
+            <InputText @bind-Value=model.LastName placeholder="Enter your last name" class="form-control" />
+            <ValidationMessage For="@(() => model.LastName)" class="validationsMessage" />
+        </div>
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            <InputText @bind-Value=model.Email type="email" placeholder="Enter your email" class="form-control" />
+            <ValidationMessage For="@(() => model.Email)" class="validationsMessage" />
+        </div>
+      <div class="form-row">
+            <div class="form-group">
+            <label class="form-label">Password</label>
+                <InputText @bind-Value=model.Password type="password" placeholder="Enter your password" class="form-control" />
+            <ValidationMessage For="@(() => model.Password)" class="validationsMessage"   />
+        </div>
+            <div class="form-group">
+            <label class="form-label">Confirm password</label>
+            <InputText @bind-Value=model.ConfirmedPassword type="password" placeholder="Confirm your password" class="form-control" />
+            <ValidationMessage For="@(() => model.ConfirmedPassword)" class="validationsMessage" />
+            
+        </div>
+      </div>
+        <button type="submit" class="btn btn-white">SIGN UP</button>
+        
+        <p>Already have an account? <NavLink class="span-link" href="/login">Sign in. </NavLink> </p>
+
+
+       </EditForm>
+       
+    
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private SignUpModel model { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private string ErrorMessage = "";
+
+
+    public async Task OnValidSubmit(EditContext editContext)
+    {
+        if (await _authService.UserExists(model.Email))
+        {
+            ErrorMessage = "User already exists.";
+            return;
+        }
+
+        if (!await _authService.CreateUserAsync(model))
+        {
+            ErrorMessage= "Failed to create user account";
+            return;
+        }
+
+
+        if (!await _authService.SendVerificationRequestAsync(model.Email))
+        {
+            NavigationManager.NavigateTo("/signin");
+        }
+        NavigationManager.NavigateTo($"/confirm?email={model.Email}");
+
+    }
+
+
+    }
+
+       
+
+       
+
+    
+

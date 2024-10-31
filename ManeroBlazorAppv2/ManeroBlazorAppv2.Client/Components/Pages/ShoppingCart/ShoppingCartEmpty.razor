@@ -1,0 +1,24 @@
+﻿@page "/shoppingcartempty"
+@inject NavigationManager NavigationManager
+
+<div>
+	<div style="width: 100%; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3rem;">
+		<div>
+			<img src="/images/ShoppingCartViews/EmptyCartImage.svg" alt="Cart is empty." style="width: 200px; height: 200px;"/>
+		</div>
+
+		<div>
+			<h1 style="font-weight: 700;">Your cart is empty!</h1>
+		</div>
+		<div>
+			Looks like you haven't made your order yet.
+		</div>
+		<div>
+			<NavLink href="/"><button class="btn btn-white btn-onboarding">Shop now</button></NavLink>
+		</div>
+	</div>
+</div>
+
+@code {
+	string pageTitle = "Shopping Cart";
+}

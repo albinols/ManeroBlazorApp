@@ -1,0 +1,25 @@
+.shopping-cart-icon {
+    position: relative;
+    justify-self: center;
+    align-self: center;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.shoppingcart-bubble-total {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: center;
+    font-family: "Mulish", sans-serif;
+    font-size: 0.75rem;
+    font-weight: bold;
+    position: relative;
+    left: -1.8rem;
+    top: -1rem;
+    background-color: red;
+    width: 2.4rem;
+    height: 1.25rem;
+    border-radius: 2.5rem;
+    color: var(--color-white);
+}

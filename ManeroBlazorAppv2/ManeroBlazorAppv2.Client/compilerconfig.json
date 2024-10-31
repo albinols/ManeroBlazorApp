@@ -1,0 +1,26 @@
+﻿[
+  {
+    "outputFile": "Components/Pages/EditProfile.razor.css",
+    "inputFile": "Components/Pages/EditProfile.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/SignOut.razor.css",
+    "inputFile": "Components/Pages/SignOut.razor.scss"
+  },
+  {
+    "outputFile": "Components/SignOut.razor.css",
+    "inputFile": "Components/SignOut.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/Profile.razor.css",
+    "inputFile": "Components/Pages/Profile.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/NewAddress.razor.css",
+    "inputFile": "Components/Pages/NewAddress.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/UpdateAddress.razor.css",
+    "inputFile": "Components/Pages/UpdateAddress.razor.scss"
+  }
+]

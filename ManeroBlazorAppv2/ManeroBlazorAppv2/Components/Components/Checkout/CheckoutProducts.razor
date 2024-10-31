@@ -1,0 +1,70 @@
+﻿@inject HttpClient httpClient
+@inject CheckoutService CheckoutService
+@inject ShoppingCartService ShoppingCartService
+
+@if (products == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="checkout-products-order-header">
+        <div class="checkout-products-my-order">My order</div>
+        <div class="checkout-products-order-total">$@orderTotal</div>
+    </div>
+    <div class="checkout-products-container checkout-products-custom-border-color">
+        @foreach (var product in products)
+        {
+            <div class="checkout-products-product">
+                <div class="checkout-products-name">@product.Name</div>
+                <div class="checkout-products-quantity-price">
+                    <div class="checkout-products-quantity">@product.Quantity x</div>
+                    <div class="checkout-products-price">$@product.Price</div>
+                </div>
+            </div>
+        }
+        <div class="checkout-products-delivery">
+            <div class="checkout-products-delivery-name">Delivery</div>
+            <div class="checkout-products-delivery-cost">$@deliveryCost</div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<CheckoutProduct> products = null!;
+    private decimal orderTotal;
+    private decimal productCost;
+    private decimal deliveryCost = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var shoppingCartItems = await ShoppingCartService.GetShoppingCartAsync(CheckoutService.UserId);
+        products = new List<CheckoutProduct>();
+
+        foreach (var item in shoppingCartItems)
+        {
+            var product = await httpClient.GetFromJsonAsync<CheckoutProduct>($"https://maneroproductprovider.azurewebsites.net/api/products/{item.ProductId}?code=PizzaKey");
+            products.Add(new CheckoutProduct
+                {
+                    Id = item.ProductId,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Quantity = item.Quantity
+                });
+        }
+
+        CalculateOrderTotal();
+    }
+
+    private void CalculateOrderTotal()
+    {
+        productCost = products.Sum(product => product.Quantity * product.Price);
+        orderTotal = productCost + deliveryCost;
+    }
+
+    public List<CheckoutProduct> GetSelectedProducts()
+    {
+        return products.ToList();
+    }
+}
+

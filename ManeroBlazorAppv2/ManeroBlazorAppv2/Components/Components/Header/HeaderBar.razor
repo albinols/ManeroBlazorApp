@@ -1,0 +1,92 @@
+﻿@using ManeroBlazorAppv2.Client.Models
+@using ManeroBlazorAppv2.Client.Services.ProductService
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager NavigationManager
+@attribute [StreamRendering]
+@rendermode @(new InteractiveServerRenderMode(false))
+
+
+<div class="header">
+    
+    <BurgerMenu />
+
+    <div class="manero-logo">
+        <NavLink href="/">MANERO</NavLink>
+    </div>
+
+   
+    <div class="navBar">
+        <div class="searchbar">
+            <div class="searchbar-toggle-container">
+                <Button class="searchbar-toggle" @onclick="HandleSearchBarCollapse">
+                    @if (IsSearchActive)
+                    {
+                        <img class="close-symbol" src="/images/icons/close-ellipse-svgrepo-com.svg" alt="dropdown" />
+
+                    }
+                    else
+                    {
+                        <img src="/images/icons/search.svg" alt="dropdown" />
+
+                    }
+                </Button>
+            </div>
+
+            <div class="searchbar-input-container">
+                <Collapse class="search-collapse" @ref="searchbar" Horizontal="true">
+
+                    <input class="searchbar-input"
+                           type="search"
+                           @onkeydown="HandleKeyPress"
+                           @oninput="(e) => SearchParam = ((ChangeEventArgs)e).Value.ToString()"
+                           id="searchbar"
+                           value="@SearchParam"
+                           placeholder="Search products..." />
+
+                </Collapse>
+            </div>
+        </div>
+            
+        
+    
+        <div class="favorites @(IsSearchActive? "hidden" : "")">
+            <NavLink href="/loading"><img src="/images/icons/heart.svg" alt="favorites" /></NavLink>
+        </div>
+            <div class="profile @(IsSearchActive? "hidden" : "")">
+                <NavLink href="/profile"><img src="/images/icons/user.svg" alt="profile"/></NavLink>
+            </div>
+
+        <div class="shopping-cart">
+            <ManeroBlazorAppv2.Client.Components.Pages.ShoppingCart.ShoppingCartIcon />
+        </div>
+    </div>
+</div>
+
+@code {
+    #region Searchbar
+
+    Collapse searchbar = default!;
+    private async Task ToggleContentAsync() => await searchbar.ToggleAsync();
+
+    private string SearchParam { get; set; }
+    public bool IsSearchActive { get; set; }
+
+
+    private async void HandleSearchBarCollapse()
+    {
+        await ToggleContentAsync();
+        IsSearchActive = !IsSearchActive;
+        StateHasChanged();
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrEmpty(SearchParam))
+        {
+            NavigationManager.NavigateTo($"/search-result/{SearchParam}");
+        }
+    }
+
+    #endregion
+
+}

@@ -1,0 +1,76 @@
+﻿@attribute [StreamRendering]
+@rendermode @(new InteractiveServerRenderMode(false))
+
+
+<div class="tabbar">
+	@* <NavLink href="/"><img src="/images/maneroicon.svg" alt="maneroLOGO" /></NavLink> *@
+
+	<nav>
+
+		<NavLink href="/"><img src="/images/icons/home.svg" alt="home" /></NavLink>
+
+		<div class="searchbar">
+			<div class="searchbar-toggle-container">
+				<Button class="searchbar-toggle" @onclick="HandleSearchBarCollapse">
+					@if (IsSearchActive)
+					{
+						<img class="close-symbol" src="/images/icons/close-ellipse-svgrepo-com.svg" alt="dropdown" />
+
+					}
+					else
+					{
+						<img src="/images/icons/search.svg" alt="dropdown" />
+
+					}
+				</Button>
+			</div>
+
+			<div class="searchbar-input-container">
+				<Collapse class="search-collapse" @ref="searchbar" Horizontal="true">
+
+					<input class="searchbar-input"
+						   type="search"
+						   @onkeydown="HandleKeyPress"
+						   @oninput="(e) => SearchParam = ((ChangeEventArgs)e).Value.ToString()"
+						   id="searchbar"
+						   value="@SearchParam"
+						   placeholder="Search products..." />
+
+				</Collapse>
+			</div>
+
+		</div>
+		<NavLink class="@(IsSearchActive? "navbarHidden": "")" href="/shoppingbag"><img src="/images/icons/bag.svg" alt="cart" /></NavLink>
+		<NavLink class="@(IsSearchActive? "navbarHidden": "")" href="/favorites"><img src="/images/icons/heart.svg" alt="favorites" /></NavLink>
+		<NavLink class="@(IsSearchActive? "navbarHidden": "")" href="/profile"><img src="/images/icons/user.svg" alt="profile" /></NavLink>
+
+	</nav>
+	@* <div class="account-buttons">
+	<NavLink class="btn btn-success mx-1" href="/signin"><i></i>Sign in</NavLink>
+	<NavLink class="btn btn-secondary max-1" href="/signup"><i></i>Sign up</NavLink>
+	</div> *@
+</div>
+
+@code {
+	Collapse searchbar = default!;
+	private async Task ToggleContentAsync() => await searchbar.ToggleAsync();
+
+	private string SearchParam { get; set; }
+	public bool IsSearchActive { get; set; }
+
+
+	private async void HandleSearchBarCollapse()
+	{
+		await ToggleContentAsync();
+		IsSearchActive = !IsSearchActive;
+		StateHasChanged();
+	}
+
+	private void HandleKeyPress(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter" && !string.IsNullOrEmpty(SearchParam))
+		{
+			NavigationManager.NavigateTo($"/search-result/{SearchParam}");
+		}
+	}
+}

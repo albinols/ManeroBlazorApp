@@ -1,0 +1,129 @@
+﻿@page "/shoppingcart"
+@using ManeroBlazorAppv2.Client.Models
+@using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json
+@using Blazored.LocalStorage
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+@inject HttpClient httpClient
+@inject ShoppingCartService shoppingCartService
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject IProductService productService
+@rendermode InteractiveAuto
+
+@if (isLoading)
+{
+	<Loading />
+}
+else 
+{
+<div class="container">
+	<CascadingValue Value="customerId">
+		<ShoppingCartHeader />
+	</CascadingValue>
+
+	@if (shoppingCart == null || !shoppingCart.Any())
+	{
+		<ShoppingCartEmpty />
+	}
+	else
+	{
+	<div>
+		@foreach (var Item in shoppingCart)
+		{
+			<CascadingValue Value="Item">
+				<ShoppingCartItem OnQuantityChanged="HandleQuantityChanged"/>
+			</CascadingValue>
+		}
+		<div style="display: flex; flex-direction: row; width: 100%; justify-content: center; margin-top: 1rem;">
+			<NavLink href="/checkout">
+						<button class="btn btn-white btn-onboarding" onclick="SaveUpdatedCartAsync">Proceed to checkout</button>
+			</NavLink>
+		</div>
+	</div>
+	}
+
+</div>
+<div class="tabbar-container">
+	<TabBar />
+</div>
+
+}
+@code {
+	private string pageTitle = "Order";
+	private bool isLoading = true;
+	private List<ShoppingCartItemModel> shoppingCart = new List<ShoppingCartItemModel>();
+	private List<Product>? products = new List<Product>();
+	private string? customerId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+			var user = authState.User;
+
+			if (user != null && (user.Identity?.IsAuthenticated ?? false))
+			{
+				customerId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+				if (!string.IsNullOrEmpty(customerId))
+				{
+					shoppingCart = await shoppingCartService.GetShoppingCartAsync(customerId);
+				}
+				else
+				{
+					NavigationManager.NavigateTo("/login");
+					return;
+				}
+			}
+			else
+			{
+				NavigationManager.NavigateTo("/login");
+				return;
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Can't render page: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+			StateHasChanged();
+		}
+
+		try
+		{
+			foreach (var item in shoppingCart)
+			{
+				Product product = await productService.GetProductById(item.ProductId.ToString());
+				products.Add(product);
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Something went wrong: {ex.Message}");
+		}
+	}
+
+	private async Task HandleQuantityChanged(ShoppingCartItemModel updatedItem)
+	{
+		var item = shoppingCart.FirstOrDefault(i => i.ProductId == updatedItem.ProductId);
+		if (item != null)
+		{
+			item.Quantity = updatedItem.Quantity;
+			await shoppingCartService.AddToCartAsync(item);
+			StateHasChanged();
+		}
+	}
+
+	private async Task SaveUpdatedCartAsync()
+	{
+		foreach (var item in shoppingCart)
+		{
+			await shoppingCartService.AddToCartAsync(item);
+		}
+		NavigationManager.NavigateTo("/checkout");
+	}
+}

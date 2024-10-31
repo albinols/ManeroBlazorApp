@@ -1,0 +1,71 @@
+﻿@import '../core/mixins.scss';
+
+.checkout-products-order-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1rem 0.3rem 1rem;
+    border: 2px solid rgba(219, 227, 245,0.5);
+
+    .checkout-products-my-order, .checkout-products-order-total {
+        font-weight: 500;
+        font-size: 18px;
+    }
+
+}
+
+.checkout-products-container {
+    display: grid;
+    row-gap: 0;
+    padding: 0.5rem 1rem;
+    background-color: rgba(219, 227, 245, 0.3);
+    color: var(--color-grey-500);
+    border-top: 5px solid rgba(219, 227, 245,0.5);
+    border-bottom: 5px solid rgba(219, 227, 245,0.5);
+
+    @include md {
+        border-right: 1px solid rgba(219, 227, 245,0.5);
+        border-left: 1px solid rgba(219, 227, 245,0.5);
+    }
+
+    .checkout-products-product {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        font-size: 14px;
+
+        .checkout-products-name {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .checkout-products-quantity-price {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            .checkout-products-quantity {
+                width: 40px;
+                text-align: right;
+            }
+
+            .checkout-products-price {
+                width: 50px;
+                text-align: right;
+            }
+        }
+    }
+
+    .checkout-products-delivery {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        font-size: 14px;
+
+        .checkout-products-delivery-name {
+        }
+
+        .checkout-products-delivery-cost {
+        }
+    }
+}

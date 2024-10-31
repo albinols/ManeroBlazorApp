@@ -1,0 +1,46 @@
+@import 'scss/core/mixins.scss';
+@import 'scss/core/general.scss';
+
+@import 'scss/components/containers.scss';
+@import 'scss/components/buttons.scss';
+@import 'scss/components/links.scss';
+@import 'scss/components/images.scss';
+@import 'scss/components/star-rating.scss';
+@import 'scss//components/filters-sortings.scss';
+@import 'scss/components/shopping-cart-icon.scss';
+@import 'scss/components/burger.scss';
+@import 'scss/components/Searchbar.scss';
+
+@import 'scss/sections/header.scss';
+@import 'scss/sections/tabbar.scss';
+@import 'scss/sections/onboarding.scss';
+@import 'scss/sections/error-message-form.scss';
+@import 'scss/sections/featured-products.scss';
+@import 'scss/sections/best-sellers.scss';
+@import 'scss/sections/categories-bar.scss';
+@import 'scss/sections/about.scss';
+@import 'scss/sections/loading.scss';
+@import 'scss/sections/forms.scss';
+@import 'scss/sections/checkout-products.scss';
+@import 'scss/sections/shipping.scss';
+@import 'scss/sections/checkout.scss';
+@import 'scss/sections/checkout-payment.scss';
+@import 'scss/sections/order-outcome.scss';
+@import 'scss/sections/order-history.scss';
+@import 'scss/sections/product-details.scss';
+@import 'scss/sections/product-details.scss';
+@import 'scss/sections/shopping-cart.scss';
+@import 'scss/sections/SearchResult.scss';
+@import 'scss/sections/order-track.scss';
+
+h1:focus {
+    outline: none;
+}
+
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
+
+.darker-border-checkbox.form-check-input {
+    border-color: #929292;
+}

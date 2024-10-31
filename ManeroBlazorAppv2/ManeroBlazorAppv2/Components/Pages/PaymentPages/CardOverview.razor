@@ -1,0 +1,109 @@
+﻿@page "/card-overview"
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@using System.Security.Claims
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+<PageTitle>Payment method</PageTitle>
+
+@if (payments == null)
+{
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+        <p>Loading...</p>
+    </div>
+}
+else
+{
+    <div class="container">
+        <div class="header">
+            <NavLink href="/profile"><img src="/images/icons/arrow-left.svg" alt="previous page" /></NavLink>
+            <h1>Payment method</h1>
+            <NavLink class="invisible-icon" href="/menu"><img src="/images/icons/arrow-left.svg" /></NavLink>
+        </div>
+
+        <div class="card-header">
+            <div class="card-title">Cards</div>
+
+            <div class="btn-container">
+                <label>Add a new card</label>
+                <NavLink href="/newcard" class="btn"><img src="/images/icons/plus.svg" /></NavLink>
+            </div>
+        </div>
+
+        @if (payments != null)
+        {
+            <div class="cards-section">
+                @foreach (var card in payments)
+                {
+                    var (firstName, lastName) = SplitName(card.CardHolderName);
+
+                    <div class="card">
+                        <img src="images/card.svg" alt="Card image" class="card-image" />
+                        <div class="card-details">
+                            <div class="card-company">@card.PaymentCompany</div>
+                            <div class="card-number">@card.CardNumber</div>
+                            <div class="name-expiry-container">
+                                <div class="card-holder">
+                                    <div>@firstName</div>
+                                    <div>@lastName</div>
+                                </div>
+                                <div class="card-expiry">
+                                    <div>EXP. END</div>
+                                    <div>@card.ExpiryDate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <nav class="list-group">
+            @foreach (var payment in payments)
+            {
+                <NavLink class="list-group-item">
+                    <div class="address-container">
+                        <div class="title">@payment.PaymentCompany</div>
+                    </div>
+                    <NavLink href="@($"/updatecard/{payment.Id}")"><img src="/images/icons/edit.svg" /></NavLink>
+                </NavLink>
+            }
+        </nav>
+    </div>
+}
+
+@code {
+    private PaymentModel[] payments;
+    private string ErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId != null)
+            {
+                payments = await HttpClient.GetFromJsonAsync<PaymentModel[]>($"https://paymentprovider-manero.azurewebsites.net/api/GetAllCards/{userId}?code=iM385-C6BXqFAchQ0u-CqRak3--f1CIHC7p0iQk3iKGJAzFuV5D8Mg%3D%3D");
+            }
+            else
+            {
+                ErrorMessage = "Payment method not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private (string FirstName, string LastName) SplitName(string fullName)
+    {
+        var parts = fullName.Split(' ', 2);
+        return (parts[0], parts.Length > 1 ? parts[1] : string.Empty);
+    }
+}

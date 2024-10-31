@@ -1,0 +1,188 @@
+﻿@import '../core/mixins.scss';
+
+.order-track-container {
+    display: flex;
+    flex-direction: column;
+
+    .order-track-header {
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 1rem 1rem;
+
+        .order-track-back-button {
+            background-color: white;
+            color: white;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
+        .order-track-section-title {
+            font-weight: 500;
+            font-size: 18px;
+            flex: 1;
+            text-align: center;
+        }
+    }
+
+    .order-track-order {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+
+        .order-track-image {
+            margin-top: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .order-track-order-text {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .order-track-order-number {
+            color: var(--color-grey-500);
+        }
+    }
+
+    .order-track-status-container {
+        /*display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 1rem;*/
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 1rem;
+
+        @include s {
+            max-width: 70%;
+        }
+
+        @include md {
+            max-width: 50%;
+        }
+
+        @include lg {
+            max-width: 40%;
+        }
+
+        .order-track-status-section {
+            /*display: flex;
+            align-items: start;
+            justify-content: center;
+            margin: 0 25%;*/
+            display: flex;
+            justify-content: center;
+            align-items: start;
+            width: 100%; /* Ensure full width */
+            max-width: 600px;
+            margin-bottom: 0.5rem;
+
+            .order-track-status-visual-container {
+                /*display: flex;
+                flex-direction: column;
+                align-items: center;*/
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                margin-right: 1.5rem;
+
+
+                .order-track-status-circle-container {
+                    /*display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 1.5rem;*/
+                    /*display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 1.5rem;*/
+                    margin-bottom: 0.5rem;
+
+                    .order-track-status-circle {
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        border: 3px solid #DBE3F5;
+                    }
+
+                    .order-track-inner-circle {
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                    }
+
+                    .filled .order-track-inner-circle {
+                        background-color: black;
+                    }
+
+                    .order-track-status-line-container {
+                        /*display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-top: 0.5rem;
+                        margin-bottom: 0.5rem;*/
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+
+
+
+                        .order-track-status-line {
+                            height: 30px;
+                        }
+                    }
+                }
+            }
+
+            .order-track-status-text-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                row-gap: 0.2rem;
+                flex: 1;
+
+                .order-track-status-title {
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+
+                .order-track-status-text {
+                    font-size: 14px;
+                    color: var(--color-grey-500);
+                    white-space: nowrap;
+                }
+            }
+
+            @include md {
+                .order-track-status-visual-container {
+                }
+
+                .order-track-status-text-container {
+                }
+            }
+
+            @include lg {
+                .order-track-status-visual-container {
+                }
+
+                .order-track-status-text-container {
+                }
+            }
+        }
+    }
+}

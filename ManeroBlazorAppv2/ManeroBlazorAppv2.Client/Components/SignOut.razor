@@ -1,0 +1,21 @@
+﻿<form action="Logout" method="post">
+    <div class="modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <h5 class="modal-title">Are you sure you want to sign out?</h5>
+                <button type="submit" class="btn btn-white">SURE</button>
+                <button type="button" class="btn btn-dark" @onclick="() => Confirm(false)">CANCEL</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@code {
+    [Parameter]
+    public EventCallback<bool> OnConfirmation { get; set; }
+
+    private async Task Confirm(bool result)
+    {
+        await OnConfirmation.InvokeAsync(result);
+    }
+}

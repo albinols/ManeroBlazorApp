@@ -1,0 +1,76 @@
+﻿@layout AdminLayout
+@page "/admin/manageproducts"
+@using ManeroBlazorAppv2.Client.Models
+@using ManeroBlazorAppv2.Client.Services.ProductService
+@inject IProductService _productService
+@inject ProductImageService _productImageService
+@rendermode InteractiveServer   
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @ErrorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(SuccessMessage))
+{
+    <div class="alert alert-success">
+        @SuccessMessage
+    </div>
+}
+
+<div class="container">
+    <div style="display:flex; flex-wrap:wrap">
+        @if (_productList != null && _productList.Any())
+        {
+            @foreach (var product in _productList)
+            {
+                <Card Class="mb-4" Style="width:18rem;">
+                    <img class="rounded-top" src="@GetFirstPicture(product)" alt="placeholder" />
+                    <CardBody>
+                        <CardTitle>@product.Name</CardTitle>
+                        <CardSubTitle Class="mb-2 text-muted">Price: @product.Price</CardSubTitle>
+                        <button type="button" class="btn btn-danger" @onclick="()=> DeleteProduct(product.Id, product.ColorImageUrls)">Delete</button>
+                    </CardBody>
+                </Card>
+            }
+        }
+        else
+        {
+            <div class="wrapper">No products found</div>
+        }
+    </div>
+</div>
+
+@code {
+    private string? ErrorMessage;
+    private string? SuccessMessage;
+    private IEnumerable<Product>? _productList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _productList = await _productService.GetAllProducts();
+    }
+
+    private string GetFirstPicture(Product product)
+    {
+        var firstList = product.ColorImageUrls!.Values.FirstOrDefault();
+        return firstList.FirstOrDefault();
+    }
+
+    private async Task DeleteProduct(string id, Dictionary<string, List<string>> imgUrls)
+    {
+        var imagesDeleted = await _productImageService.DeleteProductImages(id, imgUrls);
+
+        if (imagesDeleted)
+        {
+            await _productService.DeleteProduct(id);
+            _productList = _productList.Where(p => p.Id != id);
+        }
+        else
+        {
+            ErrorMessage = "Could not delete product images try agian";
+        }
+    }
+}

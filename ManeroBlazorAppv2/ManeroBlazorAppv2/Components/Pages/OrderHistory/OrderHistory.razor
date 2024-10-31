@@ -1,0 +1,115 @@
+﻿@page "/orderhistory/{userId}"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IOrderService OrderService
+@using System.Globalization
+@rendermode InteractiveServer
+
+@if (orders == null)
+{
+    <p>Loading...</p>
+}
+else if (!orders.Any())
+{
+    <div class="container order-history-container">
+        <header class="order-history-header">
+            <button class="order-history-back-button" @onclick="GoBack">
+                <img src="/images/icons/arrow-left.svg" alt="arrow left" />
+            </button>
+            <div class="order-history-section-title">Order history</div>
+        </header>
+        <div class="no-orders-container">
+            <div class="no-orders-message">You have no orders</div>
+            <NavLink class="no-orders-link" href="/">Continue shopping</NavLink>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container order-history-container">
+        <header class="order-history-header">
+            <button class="order-history-back-button" @onclick="GoBack">
+                <img src="/images/icons/arrow-left.svg" alt="arrow left" />
+            </button>
+            <div class="order-history-section-title">Order history</div>
+        </header>
+        <div class="order-history-list">
+            @foreach (var order in orders)
+            {
+                <div class="order-history-complete" @onclick="() => ToggleOrderDetails(order.OrderId)">
+                    <div class="order-history-summary">
+                        <div class="order-history-order-number">#@order.OrderNumber</div>
+                        <div class="order-history-date-sum">
+                            <div class="order-history-order-date">@order.OrderDate.ToString("MMM dd, yyyy", new CultureInfo("en-US"))</div>
+                            <div class="order-history-total">$@order.TotalAmount</div>
+                        </div>      
+                    </div>
+                    @if (expandedOrderId == order.OrderId)
+                    {
+                        <div class="order-history-details-container">
+                            @if (order.OrderItems != null && order.OrderItems.Any())
+                            {
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <div class="order-history-details">
+                                        <div class="order-history-product-name">@item.ProductName</div>
+                                        <div class="order-history-quantity-price">
+                                            <div class="order-history-quantity">@item.Quantity x</div>
+                                            <div class="order-history-price">$@item.UnitPrice</div>
+                                        </div>
+                                    </div>      
+                                }
+                            }
+                            else
+                            {
+                                <div>No items found for this order.</div>
+                            }
+                            <div class="order-history-track-order-button-container">
+                                <img src='/images/icons/order-track.svg' alt="Track order" class="order-track-small-image"/>
+                                <NavLink class="order-history-track-order-button" href=@($"/ordertrack/{userId}/{order.OrderId}")>Track order</NavLink>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div> 
+}
+
+@code {
+    [Parameter]
+    public string userId { get; set; }
+    private List<OrderResponseModel> orders;
+    private string expandedOrderId;
+	private string ErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            orders = await OrderService.GetAllOrdersAsync(userId);
+
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error fetching orders: {ex.Message}";
+        }
+    }
+
+    private void ToggleOrderDetails(string orderId)
+    {
+        if (expandedOrderId == orderId)
+        {
+            expandedOrderId = null;
+        }
+        else
+        {
+            expandedOrderId = orderId;
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/profile");
+    }
+}

@@ -1,0 +1,55 @@
+﻿<div class="burger">
+    <button class="btn dropdown-toggle p-0" type="button" id="burgerDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <NavLink href="/"><img src="/images/icons/burger-menu.svg" alt="dropdown" style="width: 1.5rem; height: 1.5rem;"/></NavLink>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="burgerDropdown">
+        <li>
+            <NavLink class="menu-links" href="/"><i></i>Home</NavLink>
+        </li>
+        <AuthorizeView>
+        <NotAuthorized>
+                <li>
+                    <NavLink class="menu-links" href="/login"><i></i>Sign in</NavLink>
+                </li>
+                <li>
+                    <NavLink class="menu-links" href="/signup"><i></i>Sign up</NavLink>
+                </li> 
+        </NotAuthorized>
+
+        <Authorized>
+                <li>
+                    <NavLink class="menu-links" @onclick="(() => showSignOut = true)" style="cursor: pointer">Sign out</NavLink>
+                </li>
+        </Authorized>
+        </AuthorizeView>
+        <li>
+            <NavLink class="menu-links" href="/about"><i></i>About us</NavLink>
+        </li>
+    </ul>
+</div>
+
+@if (showSignOut)
+{
+    <SignOut OnConfirmation="SignOut" />
+}
+
+@code {
+    bool showSignOut = false;
+
+    public async Task SignOut(bool result)
+    {
+        if (!result)
+        {
+            showSignOut = false;
+        }
+    }
+}
+@* <AuthorizeView>
+	<Authorized>
+		<p>Authorized</p>
+
+	</Authorized>
+	<NotAuthorized>
+		<p>You're not authorized.</p>
+	</NotAuthorized>
+</AuthorizeView> *@

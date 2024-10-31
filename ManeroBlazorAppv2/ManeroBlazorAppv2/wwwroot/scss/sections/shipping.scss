@@ -1,0 +1,140 @@
+﻿@import '../core/mixins.scss';
+
+.shipping-container {
+    padding: 0;
+
+    .shipping-custom-border-color {
+        border-color: rgba(219, 227, 245, 1) !important;
+    }
+
+    .shipping-alert {
+        display: flex;
+        justify-content: center;
+    }
+
+    .shipping-header {
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 1rem 1rem;
+
+        .shipping-back-button {
+            background-color: white;
+            color: white;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
+        .shipping-section-title {
+            font-weight: 500;
+            font-size: 18px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .shipping-header::before {
+            content: "";
+            flex: 0 0 auto;
+        }
+    }
+
+    .shipping-empty-image {
+        height: 40vh;
+        background-color: rgba(219, 227, 245, 1);
+        box-shadow: inset 0 0 10px 5px #c5ccdc;
+    }
+
+    .shipping-address-options {
+
+        @include md {
+            border-right: 2px solid rgba(219, 227, 245, 1);
+            border-left: 2px solid rgba(219, 227, 245, 1);
+        }
+
+        .shipping-address-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1rem;
+
+            .shipping-address-details {
+
+                .shipping-address-type {
+                    font-weight: 500;
+                }
+
+                .shipping-address {
+                    font-size: 14px;
+                    color: var(--color-grey-500);
+                }
+            }
+        }
+    }
+
+    .shipping-custom-address-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1rem;
+
+        @include md {
+            border-right: 2px solid rgba(219, 227, 245, 1);
+            border-left: 2px solid rgba(219, 227, 245, 1);
+            border-bottom: 2px solid rgba(219, 227, 245, 1);
+        }
+
+        .shipping-address-input {
+            display: flex;
+            position: relative;
+            justify-content: center;
+            margin-left: 2rem;
+            margin-top: 1rem;
+            width: 80%;
+
+            .shipping-address-label {
+                position: absolute;
+                margin-top: -8px;
+                margin-left: -5rem;
+                background-color: white;
+                padding: 0 10px;
+                font-size: 0.8rem;
+            }
+
+            .shipping-custom-address-input {
+                border: 2px solid rgba(219, 227, 245, 1);
+                border-radius: 2rem;
+                padding: 0.6rem 1.8rem;
+                width: 100%;
+                color: var(--color-grey-500);
+                box-shadow: none;
+            }
+
+            .shipping-custom-radio {
+            }
+        }
+    }
+}
+
+@include md {
+    .shipping-container {
+        width: 60%;
+        padding-top: 2rem;
+    }
+
+    .shipping-custom-border-color {
+        border-color: rgba(219, 227, 245, 1) !important;
+    }
+}
+
+@include lg {
+    .shipping-container {
+        width: 50%;
+        
+    }
+
+    .shipping-custom-border-color {
+        border-color: rgba(219, 227, 245, 1) !important;
+    }
+}

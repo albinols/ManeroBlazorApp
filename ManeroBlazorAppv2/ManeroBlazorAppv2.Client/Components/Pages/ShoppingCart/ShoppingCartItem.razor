@@ -1,0 +1,94 @@
+﻿@using Newtonsoft.Json
+@inject NavigationManager NavigationManager
+@inject IProductService productService
+@rendermode InteractiveAuto
+
+@if (product == null)
+{
+	<Loading />
+}
+else {
+	try {
+		<div class="shopping-cart-item-container">
+			<div class="shopping-cart-item">
+				<div class="shopping-cart-image">
+					<NavLink href="@($"/product/{product.Id}")">
+					@{
+						if (product.ColorImageUrls != null && product.ColorImageUrls.Any())
+						{
+							var firstColor = product.ColorImageUrls.Keys.First();
+							var firstImage = product.ColorImageUrls[firstColor].FirstOrDefault();
+								<img src="@firstImage" alt="Image of {product.Title}" class="shopping-cart-product-img"/>
+						}
+						else
+						{
+							<img src="/images/other/dependency-injection-tshirt.jpeg" alt="" />
+						}
+					}
+					</NavLink>
+				</div>
+				<div class="shopping-cart-details-container">
+					<div class="shopping-cart-details-list">
+						<div>@product.Name</div>
+						<div>$@product.Price</div>
+						<div>Size: @Item.Size</div>
+						<div>Color: @Item.Color</div>
+					</div>
+					<div class="shopping-cart-quantity-container">
+						<div>
+							<button class="shopping-cart-quantity-button" @onclick="IncreaseQuantity">+</button>
+						</div>
+						<div class="shopping-cart-quantity">@Item.Quantity</div>
+						<div>
+							<button class="shopping-cart-quantity-button" @onclick="DecreaseQuantity">-</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+	catch (Exception ex)
+	{
+		Console.WriteLine($"Something went wrong: {ex.Message}");
+	}
+}
+
+@code {
+
+	[CascadingParameter]
+	public ShoppingCartItemModel? Item { get; set; }
+
+	private Product? product;
+
+	[Parameter]
+	public EventCallback<ShoppingCartItemModel> OnQuantityChanged { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		try 
+		{
+			Console.WriteLine(Item.ProductId);
+			product = await productService.GetProductById(Item.ProductId);
+
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Something went wrong: {ex.Message}");
+		}
+	}
+
+	private async Task IncreaseQuantity()
+	{
+		this.Item.Quantity++;
+		await OnQuantityChanged.InvokeAsync(Item);
+	}
+
+	private async Task DecreaseQuantity()
+	{
+		if (Item.Quantity > 1)
+		{
+			this.Item.Quantity--;
+			await OnQuantityChanged.InvokeAsync(Item);
+		}
+	}
+}

@@ -1,0 +1,125 @@
+﻿@page "/login"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using ManeroBlazorAppv2.Data
+
+
+@inject ILogger<Login> Logger
+
+
+<PageTitle>Sign in</PageTitle>
+
+<div class="form-header">
+
+    <div class="form-header-image"><NavLink href="/"><img src="/images/icons/arrow-left.svg" alt="arrow left" /></NavLink></div>
+    <div class="form-header-text">
+        <h5>Sign in</h5>
+    </div>
+</div>
+
+<div class="form-div container">
+
+    <h1>Welcome Back!</h1>
+    <p>Sign in to continue</p>
+       <EditForm Model="model" OnValidSubmit="OnValidSubmit" FormName="SignUpForm" novalidate>
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger">
+                    @ErrorMessage
+                </div>
+            }
+
+        <div class="form-group mb-3">
+            <label class="form-label">Email</label>
+            <InputText @bind-Value=model.Email type="email" placeholder="Enter your email" class="form-control" />
+            <ValidationMessage For="@(() => model.Email)" />
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label">Password</label>
+            <InputText @bind-Value=model.Password type="password" placeholder="Enter your password" class="form-control" />
+            <ValidationMessage For="@(() => model.Password)" />
+            
+        </div>
+        <div class="form-check">
+            <div>
+            <InputCheckbox @bind-Value=model.isPersistent class="form-check-input" />
+            <label class="form-check-label" for="flexCheckDefault">
+                Remember me
+            </label>
+            </div>
+            <div>
+                <label>Forgot password?</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-white">SIGN IN</button>
+        <p>Don't have an account? <NavLink class="span-link" href="/signup">Sign up here. </NavLink></p>
+
+
+       </EditForm>
+
+</div>
+
+@code {
+    private string? ErrorMessage;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private SignInModel model { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // if (HttpMethods.IsGet(HttpContext.Request.Method))
+        // {
+        //     // Clear the existing external cookie to ensure a clean login process
+        //     await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        // }
+    }
+
+    public async Task OnValidSubmit()
+    {
+
+        if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
+        {
+            ErrorMessage = "Email and password can't be empty.";
+            return;
+        }
+
+        if (await _authService.UserExists(model.Email))
+        {
+            if (!await _authService.IsConfirmed(model.Email))
+            {
+                await _authService.SendVerificationRequestAsync(model.Email);
+                NavigationManager.NavigateTo($"/confirm?email={model.Email}");
+
+            }
+            if (await _authService.SignInUserAsync(model))
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+            else
+            {
+                ErrorMessage = "You have entered wrong email or password, please try again!";
+            }
+        }
+        else
+        {
+            ErrorMessage= "You have entered wrong email or password, please try again!";
+        }
+
+
+       
+
+    }
+
+   
+}

@@ -1,0 +1,82 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-MeneroBlazorAppv2-64bd3461-a590-46e4-bbfa-6b3d0b5fd8a4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MeneroBlazorAppv2.Client\MeneroBlazorAppv2.Client.csproj" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.5" />
+    <PackageReference Include="Blazor.Bootstrap" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
+    <None Include="Components\Pages\AdminPages\Admin.razor" />
+    <None Include="Components\Pages\AdminPages\CreateProduct.razor" />
+    <None Include="Components\Pages\AdminPages\UpdateProduct.razor" />
+    <None Include="wwwroot\images\icons\account-created.svg" />
+    <None Include="wwwroot\images\icons\arrow-left.svg" />
+    <None Include="wwwroot\images\icons\arrow-right.svg" />
+    <None Include="wwwroot\images\icons\bag-black.svg" />
+    <None Include="wwwroot\images\icons\bag.svg" />
+    <None Include="wwwroot\images\icons\burger-menu.svg" />
+    <None Include="wwwroot\images\icons\camera-filled.svg" />
+    <None Include="wwwroot\images\icons\camera.svg" />
+    <None Include="wwwroot\images\icons\cart-empty.svg" />
+    <None Include="wwwroot\images\icons\copy.svg" />
+    <None Include="wwwroot\images\icons\edit-filled.svg" />
+    <None Include="wwwroot\images\icons\edit.svg" />
+    <None Include="wwwroot\images\icons\facebook.svg" />
+    <None Include="wwwroot\images\icons\filter.svg" />
+    <None Include="wwwroot\images\icons\Frame 130.svg" />
+    <None Include="wwwroot\images\icons\google.svg" />
+    <None Include="wwwroot\images\icons\heart-circle.svg" />
+    <None Include="wwwroot\images\icons\heart-red.svg" />
+    <None Include="wwwroot\images\icons\heart.svg" />
+    <None Include="wwwroot\images\icons\home-circle.svg" />
+    <None Include="wwwroot\images\icons\minus-circle.svg" />
+    <None Include="wwwroot\images\icons\onboarding-navbar-left.svg" />
+    <None Include="wwwroot\images\icons\onboarding-navbar-middle.svg" />
+    <None Include="wwwroot\images\icons\onboarding-navbar-right.svg" />
+    <None Include="wwwroot\images\icons\order-circle.svg" />
+    <None Include="wwwroot\images\icons\order-failure.svg" />
+    <None Include="wwwroot\images\icons\order-success.svg" />
+    <None Include="wwwroot\images\icons\order-track.svg" />
+    <None Include="wwwroot\images\icons\password-reset.svg" />
+    <None Include="wwwroot\images\icons\payment-circle.svg" />
+    <None Include="wwwroot\images\icons\pin-circle.svg" />
+    <None Include="wwwroot\images\icons\plus-circle.svg" />
+    <None Include="wwwroot\images\icons\promocodes-circle.svg" />
+    <None Include="wwwroot\images\icons\promocodes-empty.svg" />
+    <None Include="wwwroot\images\icons\review.svg" />
+    <None Include="wwwroot\images\icons\search.svg" />
+    <None Include="wwwroot\images\icons\signout-circle.svg" />
+    <None Include="wwwroot\images\icons\twitter.svg" />
+    <None Include="wwwroot\images\icons\user.svg" />
+    <None Include="wwwroot\images\icons\work-circle.svg" />
+    <None Include="wwwroot\scss\components\buttons.scss" />
+    <None Include="wwwroot\scss\components\containers.scss" />
+    <None Include="wwwroot\scss\components\images.scss" />
+    <None Include="wwwroot\scss\components\links.scss" />
+    <None Include="wwwroot\scss\core\mixins.scss" />
+    <None Include="wwwroot\scss\sections\onboarding.scss" />
+  </ItemGroup>
+
+</Project>

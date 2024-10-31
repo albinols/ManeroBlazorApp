@@ -1,0 +1,25 @@
+.burger {
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    align-self: center;
+
+    #burgerDropdown {
+        border: none;
+    }
+
+    a {
+        color: var(--color-black);
+        text-decoration: none;
+        font-size: 1rem;
+
+        &:hover {
+            color: var(--color-grey-500);
+            font-weight: 700;
+        }
+    }
+
+    .menu-links {
+        margin-left: 5px;
+    }
+}

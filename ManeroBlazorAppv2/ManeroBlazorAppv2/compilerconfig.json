@@ -1,0 +1,46 @@
+﻿[
+  {
+    "outputFile": "Components/Pages/Profile.razor.css",
+    "inputFile": "Components/Pages/Profile.razor.scss"
+  },
+  {
+    "outputFile": "wwwroot/app.css",
+    "inputFile": "wwwroot/app.scss"
+  },
+  {
+    "outputFile": "Components/Pages/MyAddress.razor.css",
+    "inputFile": "Components/Pages/MyAddress.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/EditProfile.razor.css",
+    "inputFile": "Components/Pages/EditProfile.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/ProfilePages/Profile.razor.css",
+    "inputFile": "Components/Pages/ProfilePages/Profile.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/ProfilePages/EditProfile.razor.css",
+    "inputFile": "Components/Pages/ProfilePages/EditProfile.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/AddressPages/MyAddress.razor.css",
+    "inputFile": "Components/Pages/AddressPages/MyAddress.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/PaymentPages/PaymentMethod.razor.css",
+    "inputFile": "Components/Pages/PaymentPages/PaymentMethod.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/PaymentPages/AddNewCard.razor.css",
+    "inputFile": "Components/Pages/PaymentPages/AddNewCard.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/PaymentPages/UpdateCard.razor.css",
+    "inputFile": "Components/Pages/PaymentPages/UpdateCard.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/PaymentPages/CardOverview.razor.css",
+    "inputFile": "Components/Pages/PaymentPages/CardOverview.razor.scss"
+  }
+]

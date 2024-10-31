@@ -1,0 +1,75 @@
+﻿@page "/myaddress"
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@using System.Security.Claims
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+<PageTitle>My address</PageTitle>
+
+@if (addresses == null)
+{
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+        <p>Loading...</p>
+    </div>
+}
+else
+{
+    <div class="container">
+        <div class="header">
+            <NavLink href="/profile"><img src="/images/icons/arrow-left.svg" alt="previous page" /></NavLink>
+            <h1>My address</h1>
+            <NavLink class="invisible-icon" href="/menu"><img src="/images/icons/arrow-left.svg" /></NavLink>
+        </div>
+
+        <nav class="list-group">
+            @foreach (var userAddress in addresses)
+            {
+                <NavLink class="list-group-item">
+                    <div class="img-container">
+                        <img class="menu-icons" src="/images/icons/pin.svg" />
+                    </div>
+                    <div class="address-container">
+                        <div class="title">@userAddress.Title</div>
+                        <div class="address">@userAddress.Address</div>
+                    </div>
+                    <NavLink href="@($"/updateaddress/{userAddress.Id}")"><img src="/images/icons/edit.svg" /></NavLink>
+                </NavLink>
+            }
+        </nav>
+
+        <div class="btn-container">
+            <NavLink href="/newaddress" class="btn"><img src="/images/icons/plus.svg" /></NavLink>
+            <label>Add a new address</label>
+        </div>
+    </div>
+}
+
+@code {
+    private AddressModel[] addresses;
+    private string ErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId != null)
+            {
+                addresses = await HttpClient.GetFromJsonAsync<AddressModel[]>($"https://addressprovider-manero.azurewebsites.net/api/GetAllAddresses/{userId}?code=nsu9uOxPNJk_FCt__m0hTlTeewvaFmZmlLcbC9RUO928AzFu24uWMw%3D%3D");
+            }
+            else
+            {
+                ErrorMessage = "User not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+}

@@ -1,0 +1,74 @@
+﻿@using ManeroBlazorAppv2.Client.Models
+@using System.Net.Http
+@using System.Text.Json
+@using ManeroBlazorAppv2.Client.Services.ProductService
+@inject IProductService productService
+@inject ShoppingCartService shoppingCartService
+@inject AuthenticationStateProvider authenticationStateProvider
+
+<div class="shopping-cart-icon">
+    <NavLink href="/shoppingcart">
+        <img src="/images/icons/bag.svg" alt="cart" />
+    </NavLink>
+    <div class="shoppingcart-bubble-total" style="display: @(isVisible ? "flex" : "none")">$@totalOrderValue</div>
+</div>
+
+@code {
+
+    [Parameter]
+    public decimal totalOrderValue { get; set; }
+    private string? customerId;
+    
+    private bool isVisible = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshData();
+    }
+
+    private async Task RefreshData()
+    {
+
+        try
+        {
+            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user != null && (user.Identity?.IsAuthenticated ?? false))
+            {
+                customerId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                var shoppingCart = await shoppingCartService.GetShoppingCartAsync(customerId);
+
+                if (shoppingCart != null && shoppingCart.Any())
+                {
+                    foreach (var item in shoppingCart)
+                    {
+                        Product product = await productService.GetProductById(item.ProductId);
+                        totalOrderValue += product.Price;
+                    }
+                    isVisible = true;
+                }
+                else
+                {
+                    isVisible = false;
+                }
+            }
+            else
+            {
+                isVisible = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+}

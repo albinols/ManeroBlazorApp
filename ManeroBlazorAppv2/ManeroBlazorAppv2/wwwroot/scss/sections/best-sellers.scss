@@ -1,0 +1,74 @@
+@import '../core/mixins.scss';
+
+.best-sellers {
+    display: grid;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-light-blue);
+
+    .products-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        padding-bottom: 0.5rem;
+
+        h1 {
+            justify-self: start;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            justify-self: end;
+        }
+
+        .nav-link a {
+            text-decoration: none;
+            color: var(--color-black);
+            font-size: 0.8rem;
+        }
+    }
+
+    .best-sellers-list .product-img img {
+        height: 150px;
+        width: 150px;
+        object-fit: cover;
+    }
+
+    .best-sellers-list {
+        font-size: 0.7rem;
+
+
+        .best-sellers-container {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            padding-bottom: 1rem;
+
+            .product-img {
+                justify-self: start;
+            }
+        }
+    }
+
+    @include md {
+        .products-header {
+            h1 {
+                font-size: 2.1rem;
+            }
+        }
+
+        .best-sellers-list .product-img img {
+            height: 300px;
+            width: 300px;
+            object-fit: cover;
+        }
+
+        .best-sellers-list {
+            font-size: 1rem;
+        }
+    }
+
+    .best-sellers-description{
+        padding-left: 0.7rem;
+    }
+}

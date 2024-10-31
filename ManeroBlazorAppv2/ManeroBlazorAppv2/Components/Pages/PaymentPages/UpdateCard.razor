@@ -1,0 +1,141 @@
+﻿@page "/updatecard/{id}"
+@using Newtonsoft.Json
+@inject IPaymentService PaymentService
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Edit Card</PageTitle>
+
+<div class="container">
+    <div class="header">
+        <NavLink href="/card-overview"><img src="/images/icons/arrow-left.svg" alt="previous page" /></NavLink>
+        <h1>Update Card</h1>
+        <NavLink class="invisible-icon" href="/menu"><img src="/images/icons/arrow-left.svg" /></NavLink>
+    </div>
+
+    @if (updateCard != null)
+    {
+        var (firstName, lastName) = SplitName(updateCard.CardHolderName);
+
+        <div class="card">
+            <img src="images/card.svg" alt="Card image" class="card-image" />
+            <div class="card-details">
+                <div class="card-company">@updateCard.PaymentCompany</div>
+                <div class="card-number">@updateCard.CardNumber</div>
+                <div class="name-expiry-container">
+                    <div class="card-holder">
+                        <div>@firstName</div>
+                        <div>@lastName</div>
+                    </div>
+                    <div class="card-expiry">
+                        <div>EXP. END</div>
+                        <div>@updateCard.ExpiryDate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <EditForm Model="updateCard" OnSubmit="UpdateCardFunction" FormName="UpdateCard" novalidate>
+        <DataAnnotationsValidator />
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger">
+                @ErrorMessage
+            </div>
+        }
+
+        <div class="input-container">
+            <div class="mb-3">
+                <label for="companyInput" class="form-label">PAYMENT COMPANY</label>
+                <InputText @bind-Value="updateCard.PaymentCompany" class="form-control" id="companyInput" />
+                <ValidationMessage For="@(() => updateCard.PaymentCompany)" />
+            </div>
+            <div class="mb-3">
+                <label for="nameInput" class="form-label">NAME</label>
+                <InputText @bind-Value="updateCard.CardHolderName" class="form-control" id="nameInput" />
+                <ValidationMessage For="@(() => updateCard.CardHolderName)" />
+            </div>
+            <div class="mb-3">
+                <label for="cardNumberInput" class="form-label">CARD NUMBER</label>
+                <InputText @bind-Value="updateCard.CardNumber" class="form-control" id="cardNumberInput" />
+                <ValidationMessage For="@(() => updateCard.CardNumber)" />
+            </div>
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label for="expirationInput" class="form-label">MM/YY</label>
+                    <InputText @bind-Value="updateCard.ExpiryDate" class="form-control" id="expirationInput" />
+                    <ValidationMessage For="@(() => updateCard.ExpiryDate)" />
+                </div>
+                <div class="col-6 mb-3">
+                    <label for="cvvInput" class="form-label">CVV</label>
+                    <InputText @bind-Value="updateCard.CVV" type="password" class="form-control" id="cvvInput" />
+                    <ValidationMessage For="@(() => updateCard.CVV)" />
+                </div>
+            </div>
+            <div class="btn-container">
+                <button type="submit" class="btn btn-white">UPDATE CARD</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+
+    private PaymentModel updateCard = new PaymentModel();
+    private string ErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            updateCard = await PaymentService.GetCardById(id);
+        }
+        catch (HttpRequestException httpRequestException)
+        {
+            ErrorMessage = httpRequestException.Message;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    public async Task UpdateCardFunction()
+    {
+        ErrorMessage = "";
+
+        try
+        {
+            var error = await PaymentService.UpdateCard(id, updateCard);
+            if (string.IsNullOrEmpty(error))
+            {
+                NavigationManager.NavigateTo("/card-overview");
+            }
+            else
+            {
+                ErrorMessage = error;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private (string, string) SplitName(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            return ("", "");
+
+        var names = fullName.Split(' ');
+        if (names.Length == 1)
+            return (names[0], "");
+
+        return (names[0], string.Join(" ", names.Skip(1)));
+    }
+}

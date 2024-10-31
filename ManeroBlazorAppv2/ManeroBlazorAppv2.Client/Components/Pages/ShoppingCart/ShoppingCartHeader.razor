@@ -1,0 +1,37 @@
+﻿@using ManeroBlazorAppv2.Client.Models
+@using ManeroBlazorAppv2.Client.Services.ProductService
+@inject IProductService productService
+@rendermode InteractiveAuto
+
+<PageTitle>@pageTitle</PageTitle>
+
+<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-light-blue)">
+    <div class="burger">
+        <button class="btn dropdown-toggle p-0" type="button" id="burgerDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <NavLink href="/"><img src="/images/icons/burger-menu.svg" alt="dropdown" /></NavLink>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="burgerDropdown">
+            <li>
+                <NavLink href="/login"><i></i>Sign in</NavLink>
+            </li>
+            <li>
+                <NavLink href="/signup"><i></i>Sign up</NavLink>
+            </li>
+            <li>
+                <NavLink href="/about"><i></i>About us</NavLink>
+            </li>
+        </ul>
+    </div>
+	<div>
+        <h1 class="shopping-cart-header-title">@pageTitle</h1>
+	</div>
+    <div>
+        <ShoppingCartIcon />
+    </div>
+	
+</div>
+
+@code {
+    string pageTitle = "Cart";
+
+}

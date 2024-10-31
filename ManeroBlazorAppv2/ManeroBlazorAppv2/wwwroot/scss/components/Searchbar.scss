@@ -1,0 +1,51 @@
+﻿.searchbar {
+    display: flex;
+    align-items: center;
+
+    .close-symbol {
+        opacity: 50%;
+    }
+
+    .searchbar-toggle-container {
+
+        .searchbar-toggle {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+
+            img {
+                transition: transform 0.2s ease-in-out;
+            }
+
+            &:hover img {
+                transform: scale(1.2);
+            }
+        }
+    }
+
+    .searchbar-input-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+
+        .searchbar-input {
+            border: none;
+            border-bottom: solid black 1px;
+            flex-grow: 1;
+
+            &:focus {
+                outline: none;
+            }
+
+            &::-webkit-search-cancel-button {
+                position: relative;
+                -webkit-appearance: none;
+                height: 15px;
+                width: 15px;
+                background: url(/images/icons/close-ellipse-svgrepo-com.svg);
+                background-size: contain;
+            }
+        }
+    }
+}

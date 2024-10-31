@@ -1,0 +1,58 @@
+﻿@attribute [StreamRendering]
+@rendermode InteractiveAuto
+
+@if (product == null)
+{
+	<ManeroBlazorAppv2.Client.Components.Pages.Loading />
+}
+else {
+	<div class="best-sellers-container">
+		<NavLink class="product-img" href="@($"/product/{product.Id}")">
+			@{
+				if (product.ColorImageUrls != null && product.ColorImageUrls.Any())
+				{
+					var firstColor = product.ColorImageUrls.Keys.First();
+					var firstImage = product.ColorImageUrls[firstColor].FirstOrDefault();
+					<img src="@firstImage" alt="" />
+				}
+				else
+				{
+					<img src="/images/other/dependency-injection-tshirt.jpeg" alt="" />
+
+				}
+			}
+		</NavLink>
+		<div class="best-sellers-description">
+			<p>@product.Name</p>
+			<b>$@product.Price</b>
+			<div class="rating-container">
+
+				@if (product.Rating.HasValue)
+				{
+					<div class="rating">
+						@for (int i = 0; i < Math.Round(product.Rating.Value); i++)
+						{
+							<span class="star">&#9733;</span>
+						}
+						@for (int i = (int)Math.Round(product.Rating.Value); i < 5; i++)
+						{
+							<span class="star">&#9734;</span>
+						}
+
+					</div>
+					<div class="numeric-rating">
+						(@product.Rating.Value.ToString("0.#"))
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter]
+	public Product product { get; set; }
+
+	[Parameter]
+	public Dictionary<string, List<ImageModel>> productImages { get; set; }
+}

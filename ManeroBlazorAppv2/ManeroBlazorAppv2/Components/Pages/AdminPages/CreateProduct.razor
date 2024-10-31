@@ -1,0 +1,695 @@
+﻿@layout AdminLayout
+@page "/admin/createproduct"
+@rendermode InteractiveServer
+@using ManeroBlazorApp.Models
+@using ManeroBlazorAppv2.Client.Models
+@using Newtonsoft.Json
+@using System.Text
+@using Microsoft.AspNetCore.Http
+@using System.Web
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+<EditForm Model="@product" class="createProductForm" OnValidSubmit="@HandleSubmit" enctype="multipart/form-data">
+    <DataAnnotationsValidator />
+
+    @* Name *@
+    <div class="form-group">
+        <label for="productName">Product name</label>
+        <input @bind="@product.Name" type="text" class="form-control" placeholder="Enter product name" id="productName" />
+        <ValidationMessage For="@(()=> product.Name)" />
+    </div>
+
+    @* Price *@
+    <div class="form-group">
+        <label for="productPrice">Price</label>
+        <input @bind="@product.Price" type="number" class="form-control" placeholder="Enter prodcut name" id="productPrice" />
+        <ValidationMessage For="@(()=> product.Price)" />
+    </div>
+
+    @* Description *@
+    <div class="mb-3">
+        <label for="productDescription" class="form-label">Description</label>
+        <textarea @bind="@product.Description" class="form-control" id="productDescription" rows="3"></textarea>
+        <ValidationMessage For="@(()=> product.Description)" />
+    </div>
+
+    @* Category *@
+    <div class="form-group">
+        <label>Category</label>
+        <select @bind="product.Category" class="form-control">
+            <option>Women</option>
+            <option>Men</option>
+            <option>Kids</option>
+        </select>
+        <ValidationMessage For="@(()=> product.Category)" />
+    </div>
+
+    @* Subcategory *@
+    <div class="form-group">
+        <label>Subcategory</label>
+        <select @bind="@product.SubCategory" class="form-control">
+            <option>Clothing</option>
+            <option>Accessories</option>
+            <option>Shoes</option>
+        </select>
+        <ValidationMessage For="@(()=> product.SubCategory)" />
+    </div>
+
+    @* Product Type *@
+    <div class="form-group">
+        <label for"">Product type</label>
+        <select @bind="@product.ProductType" class="form-control">
+            @foreach (var type in GetProductTypes(product.Category, product.SubCategory))
+            {
+                <option>@type</option>
+            }
+        </select>
+        <ValidationMessage For="@(()=> product.ProductType)" />
+    </div>
+
+    @* Colors *@
+    <div class="form-group">
+        <label>Colors</label>
+        <div>
+            <input class="form-check-input darker-border-checkbox" type="checkbox" @onchange="HandleAllColorCheckboxChange" id="allColors">
+            <label class="form-check-label" for="allColors">All</label>
+            @foreach (var color in Colors)
+            {
+                <input class="form-check-input darker-border-checkbox" type="checkbox" @onchange="()=> HandleColorCheckboxChange(color)" checked="@SelectedColors.Contains(color)" id="@color">
+                <label class="form-check-label" for="@($"checkbox_{color}")">@color</label>
+            }
+        </div>
+        <ValidationMessage For="@(()=> SelectedColors)" />
+    </div>
+
+
+    @* Tags *@
+    <div class="form-group">
+        <label for"">Tags</label>
+        <div>
+            @foreach (var tag in Tags)
+            {
+                <input @onchange="()=>HandleOnChangeTag(tag)" class="form-check-input darker-border-checkbox" type="checkbox" value="" id="checkbox_@tag">
+                <label class="form-check-label" for="checkbox_@tag">@tag</label>
+            }
+        </div>
+        <ValidationMessage For="@(()=> SelectedTags)" />
+    </div>
+
+
+    @* Size  *@
+    <div class="form-group">
+        <label for"">Sizes</label>
+        <div>
+            @foreach (var size in GetSizes(product.Category, product.SubCategory, product.ProductType))
+            {
+                <input @onchange="()=>HandleOnChangeSizeCheckbox(size)" class="form-check-input darker-border-checkbox" type="checkbox" value="" id="checkbox_@size">
+                <label class="form-check-label" for="checkbox_@size">@size</label>
+            }
+        </div>
+        <ValidationMessage For="@(()=> SelectedSizes)" />
+    </div>
+
+
+    @* Files *@
+    @foreach (var color in SelectedColors)
+    {
+        <div class="border border-secondary">
+            <div class="mb-3 ">
+                <label for="formFile" class="form-label">Chose pictures for color: @color</label>
+                <InputFile multiple Model="ProductUploadModel" OnChange="(e)=>HandleFileOnChange(e,color)" class="btn" />
+            </div>
+
+            <div class="darker-border">
+                <p>Added files:</p>
+                <ul class="list-group">
+                    @if (ColorFiles.ContainsKey(color))
+                    {
+
+                        var fileNames = new List<string>();
+                        foreach (var file in ColorFiles[color])
+                        {
+                            fileNames.Add(file.Name);
+                        }
+
+                        if (fileNames != null && fileNames.Count > 0)
+                        {
+                            foreach (var fileName in fileNames)
+                            {
+                                <li class="list-group-item">@fileName <button type="button" @onclick="()=>HandleOnClickDeletePicture(color, fileName)" class="btn btn-danger">Delete</button></li>
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            @ErrorMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(SuccessMessage))
+    {
+        <div class="alert alert-success">
+            @SuccessMessage
+        </div>
+    }
+    <button class="btn btn-primary" type="submit">Create</button>
+</EditForm>
+
+@code {
+    private ProductUploadModel product = new();
+    private readonly HttpClient httpClient = new();
+    private Dictionary<string, List<IBrowserFile>> ImageFiles;
+    private string ErrorMessage = "";
+    private string SuccessMessage = "";
+
+    protected override void OnInitialized()
+    {
+        product.Category = "Women";
+        product.SubCategory = "Clothing";
+        product.ProductType = "Dresses";
+    }
+
+
+    private async Task HandleSubmit()
+    {
+        ErrorMessage = "";
+        SuccessMessage = "";
+
+        try
+        {
+            var imgLinks = new Dictionary<string, List<string>>();
+            var productData = new ProductUploadModel
+                {
+                    Name = product.Name,
+                    Price = product.Price,
+                    Description = product.Description,
+                    Category = product.Category,
+                    SubCategory = product.SubCategory,
+                    ProductType = product.ProductType,
+                    Colors = SelectedColors,
+                    Sizes = SelectedSizes,
+                    Tags = SelectedTags
+                };
+
+            var productJson = JsonConvert.SerializeObject(productData);
+            var productContent = new StringContent(productJson, Encoding.UTF8, "application/json");
+
+            //var productResponse = await httpClient.PostAsync(Configuration.GetValue<string>("ProductCreationUrl"), productContent);
+
+            var productResponse = await httpClient.PostAsync(Environment.GetEnvironmentVariable("ProductCreationUrl"), productContent);
+
+            if (productResponse.IsSuccessStatusCode)
+            {
+                var responseContent = await productResponse.Content.ReadAsStringAsync();
+                dynamic responseObject = JsonConvert.DeserializeObject(responseContent);
+                var productId = responseObject.id;
+                var productIdString = Convert.ToString(productId);
+
+                foreach (var kvp in ColorFiles)
+                {
+                    string color = kvp.Key;
+                    var files = kvp.Value;
+
+                    foreach (var file in files)
+                    {
+
+                        var formData = new MultipartFormDataContent();
+                        using var fileContent = new StreamContent(file.OpenReadStream());
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+                        formData.Add(fileContent, "file", file.Name);
+                        formData.Add(new StringContent(productIdString), "productId");
+                        formData.Add(new StringContent(color), "color");
+                        formData.Add(new StringContent(file.ContentType), "contentType");
+
+                        //var uploadResponse = await httpClient.PostAsync(Configuration.GetValue<string>("ImageUploadUrl"), formData);
+
+                        var uploadResponse = await httpClient.PostAsync(Environment.GetEnvironmentVariable("ImageUploadUrl"), formData);
+
+                        if (uploadResponse.IsSuccessStatusCode)
+                        {
+                            var response = await uploadResponse.Content.ReadAsStringAsync();
+                            var imgObject = JsonConvert.DeserializeObject<ImageModel>(response);
+
+                            if (imgLinks.Keys.Contains(color))
+                                imgLinks[color].Add(imgObject.imgUrl);
+                            else
+                                imgLinks.Add(color, new List<string> { imgObject.imgUrl });
+                        }
+                    }
+                }
+
+                productData.ColorImageUrls = imgLinks;
+
+                var updatedProductJson = JsonConvert.SerializeObject(productData);
+                var updatedProductContent = new StringContent(updatedProductJson, Encoding.UTF8, "application/json");
+
+                var productUpdateUrlTemplate = Configuration.GetValue<string>("ProductUpdateUrl");
+                var productUpdateUrl = HttpUtility.UrlDecode(productUpdateUrlTemplate).Replace("{id}", productIdString);
+
+                //var updatedProductResponse = await httpClient.PutAsync($"https://maneroproductprovider.azurewebsites.net/api/products/{productIdString}?code=newIsTheNewNew", updatedProductContent);
+
+                var updatedProductResponse = await httpClient.PutAsync(productUpdateUrl, updatedProductContent);
+
+                if (updatedProductResponse.IsSuccessStatusCode)
+                    SuccessMessage = "Product created";
+                else
+                    ErrorMessage = "Could not update product with image links";
+
+            }
+            else
+            {
+                ErrorMessage = "Error when creating product";
+            }
+
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+
+    }
+
+
+    #region Category / Type / Size
+
+    List<string> SelectedSizes = new List<string>();
+
+    //Methods
+    List<string> GetProductTypes(string category, string subcategory)
+    {
+        var key = $"{category}:{subcategory}";
+
+        if (ProductTypeOptions.ContainsKey(key))
+        {
+            return ProductTypeOptions[key];
+        }
+        else if (ProductTypeOptions.ContainsKey(category))
+            return ProductTypeOptions[category];
+
+        return new List<string>();
+    }
+
+    List<string> GetSizes(string category, string subcategory, string productType)
+    {
+        var key = $"{category}:{subcategory}";
+        var key2 = $"{subcategory}:{productType}";
+        var key3 = $"{category}:{productType}";
+
+        if (SizeOptions.ContainsKey(key))
+        {
+            return SizeOptions[key];
+        }
+        else if (SizeOptions.ContainsKey(key2))
+            return SizeOptions[key2];
+        else if (SizeOptions.ContainsKey(subcategory))
+            return SizeOptions[subcategory];
+        else if (SizeOptions.ContainsKey(key3))
+            return SizeOptions[key3];
+
+
+
+        return new List<string>();
+    }
+
+    void HandleOnChangeSizeCheckbox(string size)
+    {
+        if (SelectedSizes.Contains(size))
+            SelectedSizes.Remove(size);
+        else
+            SelectedSizes.Add(size);
+    }
+
+    #endregion
+
+    #region Colors
+    List<string> Colors { get; set; } = new List<string>
+    {
+        "Beige",
+        "Black",
+        "Blue",
+        "Brown",
+        "Green",
+        "Grey",
+        "Pink",
+        "Purple",
+        "Red",
+        "White",
+        "Yellow",
+    };
+
+    bool AllColorsChecked { get; set; }
+
+    List<string> SelectedColors { get; set; } = new List<string>();
+
+
+    void HandleAllColorCheckboxChange()
+    {
+        AllColorsChecked = !AllColorsChecked;
+
+        if (AllColorsChecked)
+        {
+            SelectedColors = new List<string>(Colors);
+        }
+        else
+        {
+            SelectedColors.Clear();
+        }
+    }
+
+    void HandleColorCheckboxChange(string color)
+    {
+        if (SelectedColors.Contains(color))
+            SelectedColors.Remove(color);
+        else
+            SelectedColors.Add(color);
+    }
+    #endregion
+
+    #region Tags
+    private List<string> SelectedTags { get; set; } = new List<string>();
+
+    void HandleOnChangeTag(string tag)
+    {
+        if (SelectedTags.Contains(tag))
+        {
+            SelectedTags.Remove(tag);
+        }
+        else
+        {
+            SelectedTags.Add(tag);
+
+        }
+    }
+    #endregion
+
+    #region Pictures
+    private Dictionary<string, List<IBrowserFile>> ColorFiles = new Dictionary<string, List<IBrowserFile>>();
+
+    async Task HandleFileOnChange(InputFileChangeEventArgs e, string color)
+    {
+        ColorFiles[color] = new List<IBrowserFile>();
+        var files = e.GetMultipleFiles();
+
+        using (var msf = new MemoryStream())
+        {
+            foreach (var file in files)
+            {
+                IBrowserFile browserFile = file;
+
+                await file.OpenReadStream().CopyToAsync(msf);
+
+                if (ColorFiles.ContainsKey(color))
+                {
+
+                    ColorFiles[color].Add(browserFile);
+                }
+                else
+                {
+                    ColorFiles[color] = new List<IBrowserFile> { browserFile };
+                }
+            }
+        }
+
+    }
+
+    void HandleOnClickDeletePicture(string color, string fileName)
+    {
+        if (ColorFiles.ContainsKey(color))
+        {
+            var filesList = new List<IBrowserFile>(ColorFiles[color]);
+
+            foreach (var pictureFile in filesList)
+            {
+                if (pictureFile.Name == fileName)
+                {
+                    ColorFiles[color].Remove(pictureFile);
+                }
+            }
+        }
+    }
+    #endregion
+
+    #region Lists
+    Dictionary<string, List<string>> ProductTypeOptions = new Dictionary<string, List<string>>
+    {
+        {"Women:Clothing", WomenClothingProductType},
+        {"Women:Accessories", WomenAccessoriesProductType},
+        {"Women:Shoes", WomenShoesProductType},
+        {"Men:Clothing", MenClothingProductType},
+        {"Men:Accessories", MenAccessoriesProductType},
+        {"Men:Shoes", MenShoesProductType},
+        {"Kids:Clothing", WomenClothingProductType},
+        {"Kids:Shoes", WomenShoesProductType},
+
+    };
+    Dictionary<string, List<string>> SizeOptions = new Dictionary<string, List<string>>
+    {
+        {"Women:Shoes", AdultShoeSizes},
+        {"Men:Shoes", AdultShoeSizes},
+        {"Clothing", AdultBasicClothingSizes},
+        {"Clothing:Jeans", AdultJeansSizes},
+        {"Clothing:Blazers", AdultJacketSizes},
+        {"Clothing:Suits", AdultJacketSizes},
+        {"Kids:Clothing", KidsClothingSizes},
+        {"Kids:Shoes", KidsShoeSizes},
+        {"Accessories:Belt", AdultBeltSizes},
+        {"Accessories", AccessoriesBasicSizes},
+
+    };
+
+
+    //Women
+    private static List<string> WomenClothingProductType { get; set; } = new List<string>
+    {
+        "Dresses",
+        "Skirts",
+        "Shorts",
+        "T-Shirts",
+        "Shirts & Blouses",
+        "Jeans",
+        "Trousers",
+        "Sweaters",
+        "Blazers",
+        "Jackets & Coats",
+        "Hoodies & Sweatshirts",
+        "Sportswear",
+        "Lingerie",
+        "Socks & Tights"
+    };
+    private static List<string> WomenAccessoriesProductType = new List<string>
+    {
+        "Bag",
+        "Belt",
+        "Bracelet",
+        "Earrings",
+        "Hat",
+        "Ring",
+        "Scarf",
+        "Sunglasses"
+    };
+    private static List<string> WomenShoesProductType = new List<string>
+    {
+        "Loafers",
+        "Sneakers",
+        "Sandals",
+        "Pumps",
+        "Moccasins",
+        "Boots",
+        "Slippers"
+    };
+
+    //Men
+    private static List<string> MenClothingProductType { get; set; } = new List<string>
+    {
+        "T-shirts and tanktops",
+        "Shorts",
+        "Trousers",
+        "Shirts",
+        "Jeans",
+        "Jackets and coats",
+        "Hoodies and sweatshirts",
+        "Sportswear",
+        "Swimwear",
+        "Blazers",
+        "Suits",
+        "Socks",
+        "Underwear",
+
+    };
+    private static List<string> MenAccessoriesProductType = new List<string>
+    {
+        "Bag",
+        "Belt",
+        "Bracelet",
+        "Hat",
+        "Ring",
+        "Sunglasses"
+    };
+    private static List<string> MenShoesProductType = new List<string>
+    {
+        "Loafers",
+        "Sneakers",
+        "Sandals",
+        "Moccasins",
+        "Boots",
+        "Slippers"
+    };
+    //Kids
+    private static List<string> KidsClothingProductType { get; set; } = new List<string>
+    {
+        "Sets & Outfits",
+        "Nightwear",
+        "Bodysuits",
+        "Tops & T-Shirts",
+        "Trousers & Jeans",
+        "Outerwear",
+        "Shorts",
+        "Dresses",
+        "Jumpers & Cardigans",
+        "Rompers",
+        "Swimwear",
+        "Shoes",
+        "Socks & Tights",
+    };
+    private static List<string> KidsShoesProductType { get; set; } = new List<string>
+    {
+        "Loafers",
+        "Sneakers",
+        "Sandals",
+        "Moccasins",
+        "Boots",
+        "Slippers"
+    };
+
+    //Sizes
+    private static List<string> AdultBasicClothingSizes { get; set; } = new List<string>{
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+    };
+    private static List<string> AdultBeltSizes { get; set; } = new List<string>
+    {
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL",
+        "4XL"
+    };
+    private static List<string> AdultJeansSizes { get; set; } = new List<string>
+    {
+        "32",
+        "34",
+        "36",
+        "38",
+        "40",
+        "42",
+        "44",
+        "46",
+        "48",
+        "50"
+    };
+    private static List<string> AdultShoeSizes { get; set; } = new List<string>
+    {
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+    };
+    private static List<string> AdultJacketSizes { get; set; } = new List<string>
+    {
+        "32",
+        "34",
+        "36",
+        "38",
+        "40",
+        "42",
+        "44",
+        "46",
+        "48",
+        "50",
+        "52",
+        "54",
+        "56",
+        "58",
+        "60",
+    };
+
+    private static List<string> KidsClothingSizes { get; set; } = new List<string>
+    {
+        "68",
+        "74",
+        "80",
+        "86",
+        "92",
+        "98",
+        "110",
+        "122",
+        "134",
+        "134/140",
+        "146/152",
+        "158/164",
+        "170",
+    };
+    private static List<string> KidsShoeSizes { get; set; } = new List<string>
+    {
+        "18/19",
+        "20/21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+    };
+
+    private static List<string> AccessoriesBasicSizes { get; set; } = new List<string>
+    {
+        "Onesize",
+    };
+
+    private static List<string> Tags { get; set; } = new List<string>
+    {
+        "Casual",
+        "Office",
+        "Sport",
+        "Beach",
+        "Summer",
+        "Fall",
+        "Winter",
+        "Spring",
+    };
+    #endregion
+
+
+}

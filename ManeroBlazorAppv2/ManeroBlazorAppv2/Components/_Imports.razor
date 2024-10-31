@@ -1,0 +1,49 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using ManeroBlazorAppv2.Components.Account
+@using ManeroBlazorAppv2.Components.Account.Pages
+@using ManeroBlazorAppv2.Services.ShoppingCartService
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using ManeroBlazorAppv2
+@using ManeroBlazorAppv2.Models
+@using ManeroBlazorAppv2.Client
+@using ManeroBlazorAppv2.Components
+@using ManeroBlazorAppv2.Components.Components.Admin
+@using ManeroBlazorAppv2.Components.Layout
+@using ManeroBlazorAppv2.Client.Components.Products
+@using ManeroBlazorAppv2.Components.Components
+@using ManeroBlazorAppv2.Client.Components
+@using BlazorBootstrap;
+@using ManeroBlazorAppv2.Components.Components.Checkout
+@using ManeroBlazorAppv2.Services.OrderService
+@using ManeroBlazorAppv2.Factories
+@using ManeroBlazorAppv2.Components.Components.Header
+
+@using ManeroBlazorAppv2.Services.PaymentService
+
+@inject HttpClient http;
+@inject NavigationManager NavigationManager
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using ManeroBlazorAppv2.Data
+@using ManeroBlazorAppv2.Services
+@using Microsoft.AspNetCore.Authorization
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> signInManager
+@inject ILogger<Register> Logger
+@inject IdentityRedirectManager RedirectManager
+@inject AuthService _authService
+@inject ShoppingCartService shoppingCartService
+

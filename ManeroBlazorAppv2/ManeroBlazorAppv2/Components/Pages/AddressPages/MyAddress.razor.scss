@@ -1,0 +1,111 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3rem;
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 43vw;
+
+        @media (max-width: 468px) {
+            width: 100%;
+        }
+
+        a {
+
+            img {
+                margin-top: -8px;
+            }
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-left: -1rem;
+        }
+
+        ::deep a.invisible-icon {
+
+            img {
+                display: none;
+            }
+        }
+    }
+
+    ::deep.list-group {
+        background-color: white;
+        padding: 0 2rem 2rem 2rem;
+        width: 50vw;
+
+        @media (max-width: 468px) {
+            border-radius: 0;
+            padding: 0 0 2rem 0;
+            width: 100vw;
+        }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+
+            @media (max-width: 468px) {
+                border-left: none;
+                border-right: none;
+            }
+
+            @media (max-width: 468px) {
+                &:first-child {
+                    border-top: none;
+                }
+            }
+
+            .img-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 50%;
+                border: 1px solid lightgray;
+                padding: 0.7rem;
+
+                img {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            }
+
+            .address-container {
+                flex: 1;
+
+                .title {
+                    font-weight: 700;
+                }
+
+                .address {
+                }
+            }
+        }
+    }
+
+    .btn-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        ::deep .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            border: 1px solid lightgray;
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+    }
+}

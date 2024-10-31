@@ -1,0 +1,70 @@
+﻿@page "/search-result/{SearchParam}"
+@using ManeroBlazorAppv2.Client.Models
+@using ManeroBlazorAppv2.Client.Services.ProductService
+@inject IProductService _productService
+
+<div class="container">
+    <div class="wrapper">
+        <div class="header">
+            <div class="burger">
+                <NavLink href="/"><img src="/images/icons/arrow-left.svg" style="width: 1rem; height: 1rem;" alt="dropdown" /></NavLink>
+            </div>
+            <div class="manero-logo">
+                <NavLink href="/">MANERO</NavLink>
+            </div>
+            <div class="shopping-cart">
+                <NavLink href="/shoppingbag"><img src="/images/icons/bag.svg" alt="cart" style="width: 2rem; height: 2rem;" /></NavLink>
+            </div>
+        </div>
+
+        <div class="search-result">
+            <div class="">
+                @if (Products == null)
+                {
+                    <div>Loading...</div>
+                }
+                else if (!Products.Any())
+                {
+                    <div>No products matched the search</div>
+                }
+                else
+                {
+                    <div class="search-result-text">
+                        <div>
+                            <div class="bold">Search results for: @SearchParam</div>
+                        </div>
+                    </div>
+
+                    <div class="featured-products">
+                        <div class="product-list">
+                            @foreach (var product in Products)
+                            {
+                                <ProductCard product="product" />
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+
+    [Parameter]
+    public string SearchParam { get; set; }
+    private List<Product>? Products;
+    public Dictionary<string, List<ImageModel>> ProductImages = new Dictionary<string, List<ImageModel>>();
+
+    protected override async Task OnInitializedAsync(){
+        Products = (await SearchProducts(SearchParam)).ToList();
+    }
+
+    private async Task<IEnumerable<Product>> SearchProducts(string searchParam)
+    {
+        return await _productService.SearchProductByTitle(searchParam);
+    }
+}

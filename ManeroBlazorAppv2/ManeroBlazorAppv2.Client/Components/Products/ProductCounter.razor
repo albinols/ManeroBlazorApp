@@ -1,0 +1,27 @@
+﻿<div class="product-counter">
+	<div class="counter-button" @onclick="DecreaseCount">-</div>
+	<span class="counter-value">@Quantity</span>
+	<div class="counter-button" @onclick="IncreaseCount">+</div>
+</div>
+
+@code {
+	[Parameter]
+	public int Quantity { get; set; }
+
+	[Parameter]
+	public EventCallback<int> QuantityChanged { get; set; }
+
+	private void DecreaseCount()
+	{
+		if (Quantity > 1)
+		{
+			Quantity--;
+			QuantityChanged.InvokeAsync(Quantity);
+		}
+	}
+	private void IncreaseCount()
+	{
+		Quantity++;
+		QuantityChanged.InvokeAsync(Quantity);
+	}
+}

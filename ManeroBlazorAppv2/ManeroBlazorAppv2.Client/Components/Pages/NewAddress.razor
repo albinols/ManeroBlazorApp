@@ -1,0 +1,57 @@
+﻿@page "/newaddress"
+@inject IAddressService AddressService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient HttpClient
+@attribute [StreamRendering]
+@rendermode InteractiveAuto
+
+<PageTitle>Add a new address</PageTitle>
+
+<div class="container">
+    <div class="header">
+        <NavLink href="/myaddress"><img src="/images/icons/arrow-left.svg" alt="previous page" /></NavLink>
+        <h1>Add a new address</h1>
+        <NavLink class="invisible-icon" href="/menu"><img src="/images/icons/arrow-left.svg" /></NavLink>
+    </div>
+
+    <EditForm Model="newAddress" OnSubmit="CreateNewAddress" FormName="CreateNewAddress" novalidate>
+        <DataAnnotationsValidator />
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger">
+                @ErrorMessage
+            </div>
+        }
+
+        <div class="input-container">
+            <div class="mb-3">
+                <label for="titleInput" class="form-label">TITLE</label>
+                <InputText @bind-Value="newAddress.Title" class="form-control" id="titleInput" />
+                <ValidationMessage For="@(() => newAddress.Title)" />
+            </div>
+            <div class="mb-3">
+                <label for="addressInput" class="form-label">ENTER A NEW ADDRESS</label>
+                <InputText @bind-Value="newAddress.Address" class="form-control" id="addressInput" />
+                <ValidationMessage For="@(() => newAddress.Address)" />
+            </div>
+            <div class="btn-container">
+                <button type="submit" class="btn btn-white">SAVE ADDRESS</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private AddressModel newAddress = new AddressModel();
+    private string ErrorMessage = "";
+
+    public async Task CreateNewAddress()
+    {
+        ErrorMessage = await AddressService.CreateNewAddress(newAddress);
+        if (string.IsNullOrEmpty(ErrorMessage))
+        {
+            NavigationManager.NavigateTo("/myaddress");
+        }
+    }
+}

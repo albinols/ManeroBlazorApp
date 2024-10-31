@@ -1,0 +1,98 @@
+﻿@page "/confirm"
+@rendermode InteractiveServer
+
+
+
+<PageTitle>Confirm email</PageTitle>
+
+<div class="form-header">
+
+    <div class="form-header-image"><NavLink href="/"><img src="/images/icons/arrow-left.svg" alt="arrow left" /></NavLink></div>
+    <div class="form-header-text">
+        <h5>Confirm</h5>
+    </div>
+</div>
+
+<div class="form-div container mt-5 p-5">
+
+    <h1>Verify your e-mail address</h1>
+    <p>We have sent a verification code to your e-mail. Please enter the verification code below.</p>
+
+    <EditForm Model="model" OnValidSubmit="OnValidSubmit" FormName="ConfirmForm" novalidate>
+            <DataAnnotationsValidator />
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger">
+                @ErrorMessage
+            </div>
+        }
+        <div class="form-group mb-3">
+            <label class="form-label">Email</label>
+            <InputText @bind-Value=model.Email type="email" class="form-control" readonly/>
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="form-label">Code</label>
+            <InputText @bind-Value=model.Code placeholder="Enter your verification code" class="form-control" />
+            <ValidationMessage For="@(() => model.Code)" />
+        
+            
+        </div>
+        <button type="submit" class="btn btn-white">VERIFY</button>
+       </EditForm>
+
+</div>
+
+@code {
+
+    [SupplyParameterFromQuery]
+    private string? Email { get; set; }
+
+    [SupplyParameterFromForm]
+    private ConfirmModel model { get; set; } = new();
+
+    private string ErrorMessage = "";
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected async Task OnValidSubmit(EditContext editContext)
+    {
+        if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Code))
+        {
+            ErrorMessage = "Invalid verification code";
+            return;
+        }
+
+        if (!await _authService.ConfirmAsync(model))
+        {
+            ErrorMessage = "Invalid verification code";
+            return;
+        }
+
+        if (!await _authService.IsConfirmed(model.Email))
+        {
+            await _authService.SendVerificationRequestAsync(model.Email);
+            NavigationManager.NavigateTo($"/confirm?email={model.Email}");
+
+        }
+
+        NavigationManager.NavigateTo("/accountcreated");
+
+
+
+    }
+
+    protected override void OnInitialized()
+    {
+        if (Email != null)
+        {
+            model.Email = Email;
+        }
+    }
+}

@@ -1,0 +1,44 @@
+﻿<Button @onclick="HandleSearchBarCollapse">
+    <img src="/images/icons/search.svg" alt="dropdown" />
+</Button>
+
+<Collapse @ref="searchbar" Horizontal="true">
+    <div class="search-wrapper">
+        <input type="search"
+               class="searchbar-input"
+               @onkeydown="HandleKeyPress"
+               @oninput="(e) => SearchParam = ((ChangeEventArgs)e).Value.ToString()"
+               id="searchbar"
+               value="@SearchParam"
+               placeholder="Search products..." />
+    </div>
+</Collapse>
+
+
+
+@code {
+
+    Collapse searchbar = default!;
+    private async Task ToggleContentAsync() => await searchbar.ToggleAsync();
+
+    private string SearchParam { get; set; }
+    [Parameter] public bool IsSearchActive { get; set; }
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+
+
+    private async void HandleSearchBarCollapse()
+    {
+        await ToggleContentAsync();
+        IsSearchActive = !IsSearchActive;
+        await ValueChanged.InvokeAsync(IsSearchActive);
+
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrEmpty(SearchParam))
+        {
+            NavigationManager.NavigateTo($"/search-result/{SearchParam}");
+        }
+    }
+}

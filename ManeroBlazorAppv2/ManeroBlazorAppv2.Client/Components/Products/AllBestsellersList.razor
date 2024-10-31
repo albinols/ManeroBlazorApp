@@ -1,0 +1,56 @@
+﻿@inject HttpClient http
+@inject IProductService productService
+@rendermode InteractiveAuto
+
+@if (products == null)
+{
+	<p>Loading...</p>
+}
+else
+{
+	if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<div class="alert alert-danger">@errorMessage</div>
+	}
+	foreach (var product in products)
+	{
+		<ProductCard product="product"/>
+	}
+}
+
+@code {
+	[Parameter]
+	public string sortBy { get; set; }
+
+	private IEnumerable<Product> products;
+	private string errorMessage;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			products = await productService.GetAllBestSellers();
+		}
+		catch (Exception ex)
+		{
+			errorMessage = "Could not load products. Try again later.";
+			Console.Error.WriteLine(ex);
+		}
+	}
+
+	protected override async Task OnParametersSetAsync()
+	{
+		try
+		{
+			if (!string.IsNullOrEmpty(sortBy))
+			{
+				products = await productService.GetProductsSorted(products, sortBy);
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = "Could not sort products. Try again later.";
+			Console.Error.WriteLine(ex);
+		}
+	}
+}

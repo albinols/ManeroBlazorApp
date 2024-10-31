@@ -1,0 +1,101 @@
+﻿@page "/"
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+@attribute [StreamRendering]
+
+<PageTitle>Inject!</PageTitle>
+
+<div class="container">
+	<div class="wrapper">
+		<ManeroBlazorAppv2.Components.Components.Header.HeaderBar />
+		<CategoriesBar/>
+		<div class="promo-banner">
+			<img src="/images/other/promo-banner.svg" class="img-fluid" />
+		</div>
+		<div class="featured-products">
+			<div class="products-header">
+				<h1>Featured products</h1>
+				<div class="nav-link">
+					<NavLink href="/products"><img src="/images/icons/arrow-left.svg" alt="" /> view all</NavLink>
+				</div>
+			</div>
+			<div class="product-list">
+				<FeaturedProductsList />
+			</div>
+		</div>
+		<div class="best-sellers">
+			<div class="products-header">
+				<h1>Best sellers</h1>
+				<div class="nav-link">
+					<NavLink href="/best-sellers"><img src="/images/icons/arrow-left.svg" alt="" /> view all</NavLink>
+				</div>
+			</div>
+			<div class="best-sellers-list">
+				<BestSellersList />
+				
+			</div>
+			<div style="width: 100%; height: 73px;"></div>
+		</div>
+	</div>
+</div>
+
+
+<div class="tabbar-container">
+	
+	<TabBar />
+</div>
+
+
+@* <AuthorizeView>
+	<Authorized>
+		<p>Authorized</p>
+
+	</Authorized>
+	<NotAuthorized>
+		<p>You're not authorized.</p>
+	</NotAuthorized>
+</AuthorizeView> *@
+
+@code {
+	protected override async Task OnParametersSetAsync()
+	{
+		try
+		{
+			if (HttpContextAccessor.HttpContext.Request.Cookies.TryGetValue("lastVisit", out string? lastVisit))
+			{
+				HttpContextAccessor.HttpContext.Response.Cookies.Delete("lastVisit");
+				await CreateLastVisitedCookie();
+			}
+			else 
+			{
+				await CreateLastVisitedCookie();
+				NavigationManager.NavigateTo("/onboarding-1");
+			}
+		}
+		catch (Exception ex)
+		{
+			throw ex;
+		}
+	}
+
+	public async Task CreateLastVisitedCookie()
+	{
+		try
+		{
+			DateTime lastVisit = DateTime.Now;
+			HttpContextAccessor.HttpContext?.Response.Cookies.Append("lastVisit", lastVisit.ToString(), new CookieOptions
+				{
+					Expires = DateTime.MaxValue,
+					HttpOnly = true,
+					Secure = true,
+					SameSite = SameSiteMode.Strict
+				});
+
+			await Task.CompletedTask;
+		}
+		catch (Exception ex)
+		{
+			throw ex;
+		}
+	}
+}

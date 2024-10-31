@@ -1,0 +1,38 @@
+﻿@attribute [StreamRendering]
+@rendermode InteractiveAuto
+
+
+<div class="filter-sorting">
+    <NavLink href="/filter" class="filters"><img src="/images/akar-icons_settings-vertical.svg" />Filters</NavLink>
+
+    <button class="btn dropdown-toggle" type="button" id="burgerDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <NavLink href="/" class="sortings">Sorting by<img src="/images/chevron-down.svg" alt="dropdown" /></NavLink>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="burgerDropdown">
+        <li>
+            <NavLink @onclick='() => SetSortingOption("Rating")' class="nav-link"><i></i>Rating (High to Low)</NavLink>
+        </li>
+        <li>
+            <NavLink @onclick='() => SetSortingOption("PriceLowToHigh")' class="nav-link"><i></i>Price (Low to High)</NavLink>
+        </li>
+        <li>
+            <NavLink @onclick='() => SetSortingOption("PriceHighToLow")' class="nav-link"><i></i>Price (High to Low)</NavLink>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private string selectedSortingOption { get; set; } = "Rating";
+
+    [Parameter]
+    public Action<string> OnSortingOptionChanged { get; set; }
+
+    private void SetSortingOption(string sortingOption)
+    {
+        selectedSortingOption = sortingOption;
+        OnSortingOptionChanged?.Invoke(selectedSortingOption);
+        StateHasChanged();
+    }
+}
+
+
